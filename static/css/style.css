@@ -2893,3 +2893,910 @@ select option {
 select {
     color: #000 !important;
 }
+
+/* ===== Profile Page ===== */
+
+.profile-container {
+    max-width: 900px;
+    margin: 40px auto;
+}
+
+.profile-card {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 25px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.profile-title {
+    font-size: 26px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+
+.profile-grid {
+    display: flex;
+    gap: 30px;
+}
+
+.profile-image {
+    text-align: center;
+}
+
+.profile-image img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ddd;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    font-weight: 500;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+.btn-save {
+    background: #007bff;
+    color: white;
+    padding: 10px 25px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-save:hover {
+    background: #0056b3;
+}
+
+.error-text {
+    color: red;
+    font-size: 13px;
+}
+body {
+    background: #f8fafc;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.profile-container {
+    max-width: 900px;
+    margin: 40px auto;
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.profile-title {
+    font-size: 28px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 20px;
+}
+
+.profile-form {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 30px;
+}
+
+.profile-image-box img {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #3b82f6;
+}
+
+label {
+    font-weight: 600;
+    color: #334155;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #cbd5f5;
+}
+
+input:focus, textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+.save-btn {
+    background: #3b82f6;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.save-btn:hover {
+    background: #2563eb;
+}
+.upload-btn {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 8px 14px;
+    background: #df6262;   /* RED theme */
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+}
+.upload-btn:hover {
+    background: #b91c1c;
+}
+.address-box {
+    resize: none;
+    height: 80px;
+}
+body {
+    background: #fff5f5;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.profile-container {
+    max-width: 900px;
+    margin: 40px auto;
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    border-top: 6px solid #dc2626;
+}
+
+.profile-title {
+    font-size: 26px;
+    font-weight: bold;
+    color: #991b1b;
+    margin-bottom: 20px;
+}
+
+.profile-form {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 30px;
+}
+
+.profile-image-box img {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #dc2626;
+}
+
+label {
+    font-weight: 600;
+    color: #7f1d1d;
+    margin-top: 12px;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #fecaca;
+}
+
+input:focus, textarea:focus {
+    outline: none;
+    border-color: #dc2626;
+    box-shadow: 0 0 0 2px rgba(220,38,38,0.2);
+}
+
+.save-btn {
+    background: #dc2626;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 15px;
+}
+
+.save-btn:hover {
+    background: #991b1b;
+}
+body {
+    background: #fff5f5;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.profile-container {
+    max-width: 900px;
+    margin: 40px auto;
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    border-top: 6px solid #dc2626;
+}
+
+.profile-title {
+    font-size: 26px;
+    font-weight: bold;
+    color: #991b1b;
+    margin-bottom: 20px;
+}
+
+.profile-form {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 30px;
+}
+
+.profile-image-box img {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #dc2626;
+}
+
+label {
+    font-weight: 600;
+    color: #7f1d1d;
+    margin-top: 12px;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #fecaca;
+}
+
+input:focus, textarea:focus {
+    outline: none;
+    border-color: #dc2626;
+    box-shadow: 0 0 0 2px rgba(220,38,38,0.2);
+}
+
+.save-btn {
+    background: #dc2626;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 15px;
+}
+
+.save-btn:hover {
+    background: #991b1b;
+}
+.profile-image-box {
+    display: flex;
+    flex-direction: column;   /* 👈 vertical */
+    align-items: center;      /* 👈 center */
+}
+
+.upload-btn {
+    margin-top: 10px;         /* 👈 image ની નીચે gap */
+    background: #dc2626;      /* red theme */
+    color: white;
+    padding: 8px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.address-box textarea {
+    height: 90px;              /* 👈 box mota na lage */
+    resize: none;              /* 👈 user size change na kari sake */
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    padding: 10px;
+    font-size: 14px;
+}
+.errorlist {
+    color: #dc2626;
+    font-size: 13px;
+    margin-top: 4px;
+}
+.profile-container {
+    background: #f5f5f5;
+    min-height: 100vh;
+    padding: 40px;
+}
+
+.profile-card {
+    background: #fff;
+    max-width: 1000px;
+    margin: auto;
+    padding: 30px;
+    border-radius: 10px;
+}
+.profile-title {
+    font-size: 28px;
+    font-weight: 600;
+    color: #b91c1c;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 30px;
+}
+.profile-grid {
+    display: flex;
+    gap: 50px;
+    align-items: flex-start;
+}
+.profile-image-box {
+    width: 250px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.profile-image-box img {
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 5px solid #dc2626;
+}
+.upload-btn {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 10px 22px;
+    background-color: #dc2626;
+    color: #fff;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+}
+.upload-btn:hover {
+    background-color: #b91c1c;
+}
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: #7f1d1d;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.address-box textarea {
+    height: 90px;   /* address bov moto na lage */
+}
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: #7f1d1d;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.address-box textarea {
+    height: 70px;   /* address bov moto na lage */
+}
+.btn-save {
+    background-color: #dc2626;
+    color: #fff;
+    padding: 12px 26px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    cursor: pointer;
+}
+.btn-save:hover {
+    background-color: #b91c1c;
+}
+.profile-grid {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+}
+.profile-grid {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+}
+.dashboard-user {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #fff; /* header dark hoy to */
+}
+
+.header-profile-img {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e60023; /* red theme */
+}
+.dashboard-user {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    top: -7px;   /* 👈 aa value adjust kari saki (−3, −5) */
+}
+/* TOP HEADER height control */
+#top-header {
+    padding: 0 !important;
+    margin: 0 !important;
+    height: 60px !important;
+    min-height: 34px !important;
+    display: flex;
+    align-items: center;
+}
+
+/* container ni extra space nikalo */
+#top-header .container {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+/* ul default spacing remove */
+#top-header ul {
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none;
+    display: flex;
+    align-items: center;
+}
+
+/* li spacing control */
+#top-header ul li {
+    margin: 0 12px 0 0;
+    padding: 0;
+    line-height: 34px;
+}
+
+/* anchor vertical align */
+#top-header ul li a {
+    padding: 0;
+    line-height: 50px;
+    font-size: 13px;
+}
+
+/* profile image align */
+.header-profile-img {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    vertical-align: middle;
+    margin-right: 6px;
+}
+
+/* dashboard text align */
+.dashboard-user {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.header-profile-img {
+    width: 35px;
+    height: 35px;
+}
+.header-ctn a {
+    color: #fff;
+    text-align: center;
+}
+
+.header-ctn i {
+    font-size: 22px;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.header-ctn span {
+    font-size: 13px;
+}
+.dashboard-dropdown {
+    position: relative;
+}
+.dashboard-menu {
+    position: absolute;
+    top: 45px;            
+    right: 15;
+    background: #fff;
+    width: 50px;
+    padding: 15px 0;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    border-radius: 6px;
+    z-index: 9999;
+}
+.dashboard-menu li {
+    list-style: none;
+}
+
+.dashboard-menu li a {
+    display: block;
+    padding: 10px 15px;
+    color: #000;
+    font-size: 14px;
+}
+
+.dashboard-menu li a:hover {
+    background: #f5f5f5;
+    color: #D10024;
+}
+.dashboard-menu {
+    display: none;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.dashboard-dropdown {
+    position: relative;
+}
+
+/* dropdown box */
+.dashboard-menu {
+    position: absolute;
+    top: 42px;
+    right: 0;
+
+    width: 170px;              /* 👈 width ghataavi */
+    background: #fff;
+    padding: 6px 0;            /* 👈 upar niche ochhu */
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+    z-index: 9999;
+}
+
+/* remove default ul spacing */
+.dashboard-menu {
+    margin: 0;
+}
+
+/* list items */
+.dashboard-menu li {
+    list-style: none;
+    margin: 0;
+}
+
+/* links inside dropdown */
+.dashboard-menu li a {
+    display: flex;
+    align-items: center;
+
+    padding: 8px 12px;         /* 👈 main height control */
+    font-size: 13px;           /* 👈 text small */
+    line-height: 1.2;          /* 👈 extra height remove */
+    color: #111;
+    white-space: nowrap;
+}
+
+.dashboard-menu li a:hover {
+    background: #f2f2f2;
+    color: #D10024;
+}
+
+.dashboard-dropdown {
+    position: relative;
+}
+
+/* dropdown box */
+.dashboard-menu {
+    position: absolute;
+    top: 42px;
+    right: 0;
+
+    width: 20px;              /* 👈 width ghataavi */
+    background: #fff;
+    padding: 6px 0;            /* 👈 upar niche ochhu */
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+    z-index: 9999;
+}
+
+/* remove default ul spacing */
+.dashboard-menu {
+    margin: 0;
+}
+
+/* list items */
+.dashboard-menu li {
+    list-style: none;
+    margin: 5;
+}
+
+/* links inside dropdown */
+.dashboard-menu li a {
+    display: flex;
+    align-items: center;
+
+    padding: 8px 12px;         /* 👈 main height control */
+    font-size: 20px;           /* 👈 text small */
+    line-height: -20;          /* 👈 extra height remove */
+    color: #111;
+    white-space: nowrap;
+}
+
+.dashboard-menu li a:hover {
+    background: #f2f2f2;
+    color: #D10024;
+}
+.small-menu li a {
+    padding: 5px 8px !important;
+    font-size: 11px !important;
+}
+/* ===== FORCE DROPDOWN HEIGHT FIX ===== */
+
+.dashboard-menu * {
+    box-sizing: border-box !important;
+}
+
+/* dropdown box */
+.dashboard-menu {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 50px;
+}
+
+/* li */
+.dashboard-menu li {
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+}
+
+/* a tag – MAIN FIX */
+.dashboard-menu li a {
+    display: flex !important;
+    align-items: center !important;
+
+    padding: 4px 8px !important;   /* 👈 HEIGHT CONTROL */
+    margin: 0 !important;
+
+    font-size: 11px !important;
+    line-height: 18px !important;  /* 👈 MOST IMPORTANT */
+
+    min-height: 0 !important;
+    height: auto !important;
+
+    white-space: nowrap;
+}
+.dashboard-menu {
+    width: 100px !important;   /* 👈 aa value ochi/vadhi karo */
+    min-width: 100px !important;
+}
+.dashboard-menu {
+    width: 100px !important;   /* 👈 aa value ochi/vadhi karo */
+    min-width: 100px !important;
+}
+.invoice-btn {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: 0.3s;
+}
+
+.invoice-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0,123,255,0.4);
+}
+.orders-wrapper{
+    background:#fff;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 8px 25px rgba(0,0,0,0.08);
+    margin-top:30px;
+}
+
+.orders-title{
+    font-size:26px;
+    font-weight:600;
+    margin-bottom:20px;
+    border-left:5px solid #d10024;
+    padding-left:12px;
+}
+
+.orders-table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.orders-table thead{
+    background:#1e1f29;
+    color:#fff;
+}
+
+.orders-table th,
+.orders-table td{
+    padding:14px;
+    text-align:center;
+    vertical-align:middle;
+}
+
+.orders-table tbody tr{
+    transition:0.3s;
+}
+
+.orders-table tbody tr:hover{
+    background:#f9f9f9;
+}
+
+/* Status badge */
+.status{
+    padding:5px 12px;
+    border-radius:20px;
+    font-size:13px;
+    font-weight:500;
+}
+
+.status.pending{
+    background:#fff3cd;
+    color:#856404;
+}
+
+/* Invoice button */
+.btn-invoice{
+    background:#cf1534;
+    color:#fff;
+    padding:6px 14px;
+    border-radius:6px;
+    font-size:13px;
+    text-decoration:none;
+}
+
+.btn-invoice:hover{
+    background:#9c1023;
+}
+
+/* Empty orders */
+.no-orders{
+    text-align:center;
+    font-size:16px;
+    color:#777;
+}
+body{
+    font-family: 'Segoe UI', sans-serif;
+    background:#f4f6f8;
+}
+
+.invoice-container{
+    max-width:900px;
+    margin:30px auto;
+    background:#fff;
+    padding:40px;
+    border-radius:10px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.08);
+}
+
+.invoice-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+}
+
+.brand{
+    margin:0;
+    font-size:28px;
+    font-weight:700;
+}
+
+.phone{
+    margin-top:8px;
+    font-weight:500;
+}
+
+.invoice-info h2{
+    margin:0;
+    font-size:24px;
+}
+
+.bill-section{
+    margin:30px 0;
+}
+
+.invoice-table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.invoice-table th{
+    background:#1e1f29;
+    color:#fff;
+    padding:12px;
+    text-align:left;
+}
+
+.invoice-table td{
+    padding:12px;
+    border-bottom:1px solid #ddd;
+}
+
+.invoice-table tr:hover{
+    background:#f9f9f9;
+}
+
+.invoice-total{
+    margin-top:30px;
+    text-align:right;
+}
+
+.invoice-total h2{
+    margin-top:10px;
+    color:#d10024;
+}
+
+.invoice-actions{
+    margin-top:30px;
+    display:flex;
+    gap:15px;
+}
+
+.btn-print{
+    background:#fd0d0d;
+    color:#fff;
+    padding:10px 18px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+.btn-back{
+    background:#6c757d;
+    color:#fff;
+    padding:10px 18px;
+    border-radius:6px;
+    text-decoration:none;
+}
+
+/* PRINT */
+@media print{
+    body{
+        background:#fff;
+    }
+    .invoice-actions{
+        display:none;
+    }
+}
+

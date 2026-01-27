@@ -3,6 +3,7 @@ from .models import Product, ProductCategory, ProductBrand, Cart, Wishlist, Orde
 from django.contrib.auth import get_user_model
 from django.contrib.admin import AdminSite
 from django.contrib.auth.admin import UserAdmin as DefaultUserAdmin
+from .models import UserProfile
 
 User = get_user_model()
 
@@ -68,3 +69,4 @@ admin.site.register(Cart, CartAdmin)
 admin.site.register(Wishlist, WishlistAdmin)
 admin.site.register(Order, OrderAdmin)
 admin.site.register(OrderItem, OrderItemAdmin)
+admin.site.register(UserProfile)

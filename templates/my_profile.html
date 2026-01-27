@@ -9,7 +9,7 @@
 		 <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
 
 		<title>Electro - HTML Ecommerce Template</title>
-
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 		<!-- Google font -->
 		<link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700" rel="stylesheet">
 
@@ -57,7 +57,11 @@
 <li class="dashboard-dropdown">
     <a href="#" class="dashboard-link" onclick="toggleDashboard(event)">
         {% if user.is_authenticated %}
-            Hi, {{ user.username }}
+            <span class="dashboard-user">
+                <img src="{{ user.userprofile.profile_image.url }}"
+                     class="header-profile-img">
+                Hi, {{ user.username }}
+            </span>
         {% else %}
             My Dashboard
         {% endif %}
@@ -69,7 +73,6 @@
             <li><a href="{% url 'my_address' %}">My Address</a></li>
             <li><a href="{% url 'order_list' %}">Order List</a></li>
             <li><a href="{% url 'order_status' %}">Order Status</a></li>
-           
             <li><a href="{% url 'logout' %}">Logout</a></li>
         {% else %}
             <li><a href="{% url 'login' %}">Login</a></li>
@@ -77,8 +80,6 @@
         {% endif %}
     </ul>
 </li>
-
-
     </div>
 </div>
 <!-- /TOP HEADER -->
@@ -134,7 +135,7 @@
 								<!-- Cart -->
 								<div>
 									<a href="{% url 'cart' %}">
-										<i class="fa fa-heart-o"></i>
+										<i class="fa fa-shopping-cart"></i>
 										<span>Your Cart</span>
 										
 									</a>
@@ -183,12 +184,36 @@
 		</nav>
 		<!-- /NAVIGATION -->
 
-  <div class="content">
-  <h2>My Profile</h2>
-  <p>View and edit your personal information like username, email, and contact details.</p>
+ {% load static %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+<div class="profile-container">
+  <div class="profile-card">
+
+    <h2 class="profile-title">My Profile</h2>
+
+    <div class="profile-grid">
+
+      <!-- LEFT : IMAGE -->
+      <div class="profile-image-box">
+        <img src="{{ profile.profile_image.url }}" alt="Profile">
+        <a href="{% url 'edit_profile' %}" class="upload-btn">Edit Profile</a>
+      </div>
+
+      <!-- RIGHT : DETAILS -->
+      <div style="flex:1">
+        <p><b>Username:</b> {{ user.username }}</p>
+        <p><b>Email:</b> {{ user.email }}</p>
+        <p><b>Phone:</b> {{ profile.phone }}</p>
+        <p><b>Address:</b> {{ profile.address }}</p>
+        <p><b>City:</b> {{ profile.city }}</p>
+        <p><b>State:</b> {{ profile.state }}</p>
+        <p><b>Pincode:</b> {{ profile.pincode }}</p>
+      </div>
+
+    </div>
+  </div>
 </div>
-
-
 
 
         <!-- NEWSLETTER -->

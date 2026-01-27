@@ -5,6 +5,11 @@ from django.contrib import messages
 from django.core.mail import send_mail
 from django.conf import settings
 from django.http import HttpResponse
+from .models import UserProfile
+from .forms import UserProfileForm
+from django.template.loader import render_to_string
+from django.template.loader import get_template
+from xhtml2pdf import pisa
 
 from django.contrib.auth import get_user_model
 from .forms import CustomLoginForm, RegisterForm
@@ -163,9 +168,27 @@ def logout_view(request):
     return redirect('index') 
 
 # ---------- MY PROFILE ----------
-@login_required(login_url='login')
+@login_required
 def my_profile(request):
-    return render(request, 'my_profile.html')
+    profile, created = UserProfile.objects.get_or_create(user=request.user)
+
+    return render(request, 'my_profile.html', {'profile': profile})
+
+
+
+def edit_profile(request):
+    profile = UserProfile.objects.get(user=request.user)
+
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            return redirect('my_profile')
+    else:
+        form = UserProfileForm(instance=profile)
+
+    return render(request, 'edit_profile.html', {'form': form})
+
 
 # ---------- MY ADDRESS ----------
 @login_required(login_url='login')
@@ -192,15 +215,39 @@ def order_status(request):
     return render(request, 'order_status.html', {'orders': orders})
 
 # ---------- INVOICE A4 ----------
-
 @login_required
 def invoice_a4(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
 
+    items = order.items.all()
+
+    grand_total = 0
+    for item in items:
+        grand_total += item.quantity * item.price
+
     return render(request, 'invoice_a4.html', {
         'order': order,
-        'items': order.items.all(),   # related_name='items'
+        'items': items,
+        'grand_total': grand_total
     })
+
+
+@login_required
+def download_invoice_pdf(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    items = order.items.all()
+
+    template = get_template('invoice_pdf.html')
+    html = template.render({
+        'order': order,
+        'items': items
+    })
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="invoice_{order.id}.pdf"'
+
+    pisa.CreatePDF(html, dest=response)
+    return response
 
 # ---------- PRODUCT LIST ----------
 

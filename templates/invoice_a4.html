@@ -1,65 +1,199 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Invoice #{{ order.id }}</title>
-    <style>
-        body { font-family: Arial; margin: 40px; }
-        .header { display:flex; justify-content:space-between; }
-        table { width:100%; border-collapse:collapse; margin-top:20px; }
-        th, td { border:1px solid #333; padding:8px; text-align:left; }
-        th { background:#f2f2f2; }
-        .right { text-align:right; }
-        .btn { margin-top:20px; }
-        @media print { .no-print { display:none; } }
-    </style>
+<meta charset="UTF-8">
+<title>Invoice</title>
+
+<style>
+@page {
+    size: A4;
+    margin: 20mm;
+}
+
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #f2f2f2;
+}
+
+/* A4 Paper */
+.invoice-wrapper {
+    width: 210mm;
+    min-height: 297mm;
+    margin: auto;
+    background: #ffffff;
+    padding: 25mm;
+}
+
+/* HEADER */
+.header {
+    border-bottom: 3px solid #d32f2f;
+    padding-bottom: 15px;
+    margin-bottom: 25px;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 30px;
+    letter-spacing: 1px;
+    color: #d32f2f;
+}
+
+.header .company {
+    font-size: 25px;
+    font-weight: 600;
+    margin-top: 5px;
+}
+
+.header p {
+    margin: 3px 0;
+    font-size: 14px;
+    color: #444;
+}
+
+/* INFO */
+.info {
+    margin: 30px 0;
+    font-size: 15px;
+}
+
+.info p {
+    margin: 8px 0;
+}
+
+.info strong {
+    display: inline-block;
+    width: 130px;
+}
+
+/* TABLE */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 30px;
+    font-size: 15px;
+}
+
+th {
+    background: #f8d7da;
+    color: #000;
+    padding: 12px;
+    border-bottom: 2px solid #d32f2f;
+}
+
+td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+}
+
+.text-right {
+    text-align: right;
+}
+
+/* TOTAL */
+.total-box {
+    margin-top: 40px;
+    width: 40%;
+    float: right;
+    font-size: 16px;
+}
+
+.total-box div {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+}
+
+.total-box .grand {
+    margin-top: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    border-top: 2px solid #000;
+    padding-top: 10px;
+}
+
+/* FOOTER */
+.footer {
+    margin-top: 80px;
+    text-align: center;
+    font-size: 13px;
+    color: #777;
+}
+
+/* PRINT */
+@media print {
+    body {
+        background: none;
+    }
+}
+
+</style>
 </head>
+
 <body>
 
+<div class="invoice-wrapper">
+
+    <!-- HEADER -->
+    
+
 <div class="header">
-    <div>
-        <h2>Click 'n Call</h2>
-        <p>Alpha One Mall, Ahmedabad</p>
-        <p>📞 87349 32020</p>
-    </div>
-    <div class="right">
-        <h3>Invoice</h3>
-        <p>Invoice No.: {{ order.id }}</p>
-        <p>Date: {{ order.created_at|date:"d M Y" }}</p>
-    </div>
+    <h1>INVOICE</h1>
+    <div class="company">Click 'n Call Mobile Shop</div>
+    <p>Near Alpha One Mall, Ahmedabad</p>
+    <p>📞 87349 32020</p>
 </div>
 
-<hr>
 
-<h3>Bill To:</h3>
-<p>
-    {{ order.first_name }} {{ order.last_name }}<br>
-    {{ order.address }}<br>
-    {{ order.city }}, {{ order.country }} - {{ order.zip_code }}<br>
-    📧 {{ order.email }} | 📞 {{ order.phone }}
-</p>
 
-<table>
-    <tr>
-        <th>Product</th>
-        <th>Qty</th>
-        <th>Price</th>
-        <th>Total</th>
-    </tr>
-    {% for item in items %}
-    <tr>
-        <td>{{ item.product.product_name }}</td>
-        <td>{{ item.quantity }}</td>
-        <td>{{ item.price }}</td>
-        <td>{{ item.quantity|floatformat:0|add:""|safe }}</td>
-    </tr>
-    {% endfor %}
-</table>
+    <!-- INFO -->
+    <div class="info">
+        <p><strong>Invoice No:</strong> {{ order.id }}</p>
+        <p><strong>Date:</strong> {{ order.created_at|date:"d M Y" }}</p>
+        <p><strong>Customer:</strong> {{ order.user.username }}</p>
+        <p><strong>Payment:</strong> {{ order.payment_method }}</p>
+    </div>
 
-<h3 class="right">Payment: {{ order.payment_method }}</h3>
+    <!-- TABLE -->
+    <table>
+        <tr>
+            <th>Product</th>
+            <th>Qty</th>
+            <th class="text-right">Price</th>
+            <th class="text-right">Total</th>
+        </tr>
 
-<div class="no-print btn">
-    <button onclick="window.print()">Print Invoice</button>
-    <a href="{% url 'store' %}">Continue Shopping</a>
+        {% for item in items %}
+        <tr>
+            <td>{{ item.product.name }}</td>
+            <td>{{ item.quantity }}</td>
+            <td class="text-right">₹ {{ item.price }}</td>
+             <td class="text-right">
+        ₹ {{ item.quantity|floatformat:0 }} × {{ item.price }} = 
+        ₹ {{ item.quantity|add:0 }}
+    </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <!-- TOTAL -->
+    <div class="total-box">
+        <div>
+            <span>Subtotal</span>
+            <span>₹ {{ grand.total }}</span>
+        </div>
+        <div class="grand">
+            <span>Grand Total</span>
+            <span>₹ {{ grand.total }}</span>
+        </div>
+    </div>
+
+    <div style="clear: both;"></div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        Thank you for shopping with Click 'n Call 🙏
+    </div>
+
 </div>
 
 </body>

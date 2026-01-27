@@ -18,6 +18,9 @@ urlpatterns = [
     # 👤 User
     path('register/', views.register_view, name='register'),
     path('my-profile/', views.my_profile, name='my_profile'),
+    path('edit-profile/', views.edit_profile, name='edit_profile'),
+    path('invoice-pdf/<int:order_id>/', views.download_invoice_pdf, name='download_invoice_pdf'),
+
     path('my-address/', views.my_address, name='my_address'),
 
     # 🛒 Cart & Checkout
