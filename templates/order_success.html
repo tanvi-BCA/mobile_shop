@@ -1,0 +1,6 @@
+<h2>Thank you {{ order.first_name }}! 🎉</h2>
+<p>Your order <strong>No. {{ order.id }}</strong> has been placed successfully.</p>
+
+<a href="{% url 'invoice_a4' order.id %}">View Invoice</a>
+<br><br>
+<a href="{% url 'store' %}">Continue Shopping</a>

@@ -1,0 +1,143 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login | My Project</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: "Segoe UI", sans-serif;
+            background: #fff7ed;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .auth-box {
+            width: 380px;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            border-top: 6px solid #ba1414;
+        }
+
+        h2 {
+            text-align: center;
+            color: #ba1414;
+            margin-bottom: 25px;
+        }
+
+        label {
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 6px;
+            margin-bottom: 14px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #ba1414;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: #ba1414;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: #ba1414;
+        }
+
+        .error {
+            color: red;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .extra {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .extra a {
+            color: #ba1414;
+            font-weight: 600;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+    
+<div class="auth-box">
+    <h2>Welcome to Click 'n Call.</h2>
+    <h2>Login</h2>
+
+    <!-- non-field errors (wrong username/password) -->
+    {% if form.non_field_errors %}
+        {% for error in form.non_field_errors %}
+            <div class="error">{{ error }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        <!-- Username -->
+        <label>{{ form.username.label }}</label>
+        {{ form.username }}
+        {% if form.username.errors %}
+            <div class="error">{{ form.username.errors|striptags }}</div>
+        {% endif %}
+
+        <!-- Password -->
+        <label>{{ form.password.label }}</label>
+        {{ form.password }}
+        {% if form.password.errors %}
+            <div class="error">{{ form.password.errors|striptags }}</div>
+        {% endif %}
+
+        <button type="submit" class="btn">Login</button>
+    </form>
+
+    <div class="extra">
+        Don’t have an account?
+        <a href="{% url 'register' %}">Registration</a>
+    </div>
+</div>
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show"
+         role="alert"
+         style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  {% endfor %}
+{% endif %}
+
+</body>
+</html>

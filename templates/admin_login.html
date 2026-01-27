@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Login</title>
+
+    <style>
+        body {
+            background: #f5f5f5;
+            font-family: Arial, sans-serif;
+        }
+
+        .login-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-box {
+            background: #ffffff;
+            width: 420px;
+            padding: 30px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .login-logo {
+            font-size: 30px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .login-sub {
+            font-size: 14px;
+            color: #777;
+            margin-bottom: 25px;
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .login-box input:focus {
+            outline: none;
+            border-color: #a81717;
+        }
+
+        .login-box button {
+            width: 100%;
+            padding: 10px;
+            background: #a81717;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .login-box button:hover {
+            background: #8e1010;
+        }
+
+        .error-box {
+            color: #ba2121;
+            border-left: 4px solid #ba2121;
+            padding: 12px;
+            margin-bottom: 15px;
+            background: #fff5f5;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-wrapper">
+    <div class="login-box">
+
+        <div class="login-logo">Admin Login</div>
+        <div class="login-sub">Sign in to access the admin dashboard</div>
+
+        {% if error %}
+            <div class="error-box">
+                {{ error }}
+            </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <input type="text" name="username" placeholder="Username">
+            <input type="password" name="password" placeholder="Password">
+            <button type="submit">Log in</button>
+        </form>
+
+    </div>
+</div>
+
+</body>
+</html>

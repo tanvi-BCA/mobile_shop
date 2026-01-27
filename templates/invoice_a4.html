@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Invoice #{{ order.id }}</title>
+    <style>
+        body { font-family: Arial; margin: 40px; }
+        .header { display:flex; justify-content:space-between; }
+        table { width:100%; border-collapse:collapse; margin-top:20px; }
+        th, td { border:1px solid #333; padding:8px; text-align:left; }
+        th { background:#f2f2f2; }
+        .right { text-align:right; }
+        .btn { margin-top:20px; }
+        @media print { .no-print { display:none; } }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div>
+        <h2>Click 'n Call</h2>
+        <p>Alpha One Mall, Ahmedabad</p>
+        <p>📞 87349 32020</p>
+    </div>
+    <div class="right">
+        <h3>Invoice</h3>
+        <p>Invoice No.: {{ order.id }}</p>
+        <p>Date: {{ order.created_at|date:"d M Y" }}</p>
+    </div>
+</div>
+
+<hr>
+
+<h3>Bill To:</h3>
+<p>
+    {{ order.first_name }} {{ order.last_name }}<br>
+    {{ order.address }}<br>
+    {{ order.city }}, {{ order.country }} - {{ order.zip_code }}<br>
+    📧 {{ order.email }} | 📞 {{ order.phone }}
+</p>
+
+<table>
+    <tr>
+        <th>Product</th>
+        <th>Qty</th>
+        <th>Price</th>
+        <th>Total</th>
+    </tr>
+    {% for item in items %}
+    <tr>
+        <td>{{ item.product.product_name }}</td>
+        <td>{{ item.quantity }}</td>
+        <td>{{ item.price }}</td>
+        <td>{{ item.quantity|floatformat:0|add:""|safe }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<h3 class="right">Payment: {{ order.payment_method }}</h3>
+
+<div class="no-print btn">
+    <button onclick="window.print()">Print Invoice</button>
+    <a href="{% url 'store' %}">Continue Shopping</a>
+</div>
+
+</body>
+</html>
