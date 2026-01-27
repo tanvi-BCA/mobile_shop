@@ -208,7 +208,7 @@
                 <td style="color: black;">{{ item.product.product_name }}</td>
 
                 
-                <td style="color: black;">${{ item.product.price }}</td>
+                <td style="color: black;">₹{{ item.product.price }}</td>
                 <td class="text-center" style="color: black;">
                  <a href="{% url 'decrease_quantity' item.product.id %}" class="btn btn-sm btn-outline-secondary">−</a>
 
@@ -217,7 +217,7 @@
               <a href="{% url 'increase_quantity' item.product.id %}" class="btn btn-sm btn-outline-secondary">+</a>
                 </td>
 
-                <td style="color: black;">${{ item.total_price }}</td>
+                <td style="color: black;">₹{{ item.total_price }}</td>
                 <td>
                     <form action="{% url 'remove_from_cart' item.product.id %}" method="post">
     {% csrf_token %}
@@ -249,7 +249,7 @@
             <tr>
                 <th style="color: black;">Subtotal</th>
                 <td class="text-end" style="color: black;"
-				>${{ subtotal|default:"0.00" }}</td>
+				>₹{{ subtotal|default:"0.00" }}</td>
             </tr>
             <tr>
                 <th style="color: black;">Shipping</th>
@@ -261,7 +261,7 @@
             </tr>
             <tr class="table-light">
                 <th><strong>Estimated Total</strong></th>
-                <td class="text-end"><strong>${{ total|default:"0.00" }}</strong></td>
+                <td class="text-end"><strong>₹{{ total|default:"0.00" }}</strong></td>
             </tr>
         </tbody>
     </table>
