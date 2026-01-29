@@ -42,8 +42,18 @@ class ProductBrand(models.Model):
 class Product(models.Model):
     product_name = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)
+
+    mrp = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        blank=True,
+        null=True
+    )
+
     price = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.IntegerField()
+
+    is_hot_deal = models.BooleanField(default=False)
 
     category = models.ForeignKey(
         ProductCategory,
@@ -61,9 +71,20 @@ class Product(models.Model):
 
     image = models.ImageField(upload_to='products/', blank=True, null=True)
 
+    # % OFF calculate
+    def discount_percent(self):
+        if self.mrp and self.mrp > self.price:
+            return int(((self.mrp - self.price) / self.mrp) * 100)
+        return 0
+
+    # discounted price
+    def discounted_price(self):
+        if self.mrp and self.discount_percent() > 0:
+            return self.mrp - (self.mrp * self.discount_percent() / 100)
+        return self.price
+
     def __str__(self):
         return self.product_name
-
 
 # ------------------
 # CART
@@ -120,3 +141,13 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return self.user.username
+    
+class HotDeal(models.Model):
+    title = models.CharField(max_length=100)
+    subtitle = models.CharField(max_length=200)
+    end_time = models.DateTimeField()
+    products = models.ManyToManyField(Product, blank=True)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.title

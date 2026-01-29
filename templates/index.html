@@ -112,10 +112,15 @@ select option {
 
 <li class="dashboard-dropdown">
     <a href="#" class="dashboard-link" onclick="toggleDashboard(event)">
-        {% if user.is_authenticated %}
+        {% if user.is_authenticated and not user.is_staff %}
             <span class="dashboard-user">
-                <img src="{{ user.userprofile.profile_image.url }}"
-                     class="header-profile-img">
+                {% if user.userprofile.profile_image %}
+                    <img src="{{ user.userprofile.profile_image.url }}"
+                         class="header-profile-img">
+                {% else %}
+                    <img src="{% static 'images/profile.webp' %}"
+                         class="header-profile-img">
+                {% endif %}
                 Hi, {{ user.username }}
             </span>
         {% else %}
@@ -124,7 +129,7 @@ select option {
     </a>
 
     <ul class="dashboard-menu" style="display: none;">
-        {% if user.is_authenticated %}
+      {% if user.is_authenticated and not user.is_staff %}
             <li><a href="{% url 'my_profile' %}">My Profile</a></li>
             <li><a href="{% url 'my_address' %}">My Address</a></li>
             <li><a href="{% url 'order_list' %}">Order List</a></li>
@@ -226,17 +231,35 @@ select option {
 			<!-- container -->
 			<div class="container">
 				<!-- responsive-nav -->
-				<div id="responsive-nav">
-					<!-- NAV -->
-					<ul class="main-nav nav navbar-nav">
-						<li class="active"><a href="{% url 'index' %}">Home</a></li>
-						<li><a href="{% url 'store' %}">Shop</a></li>
-						<li><a href="{% url 'cart' %}">Cart</a></li>
-						<li><a href="{% url 'checkout' %}">Checkout</a></li>
-						<li><a href="{% url 'contact' %}">Contact</a></li>
-					</ul>
-					<!-- /NAV -->
-				</div>
+<div id="responsive-nav">
+    <!-- NAV -->
+    <ul class="main-nav nav navbar-nav">
+
+        <li class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}">
+            <a href="{% url 'index' %}">Home</a>
+        </li>
+
+        <li class="{% if request.resolver_match.url_name == 'store' %}active{% endif %}">
+            <a href="{% url 'store' %}">Shop</a>
+        </li>
+
+        <li class="{% if request.resolver_match.url_name == 'cart' %}active{% endif %}">
+            <a href="{% url 'cart' %}">Cart</a>
+        </li>
+
+        <li class="{% if request.resolver_match.url_name == 'checkout' %}active{% endif %}">
+            <a href="{% url 'checkout' %}">Checkout</a>
+        </li>
+
+        <li class="{% if request.resolver_match.url_name == 'contact' %}active{% endif %}">
+            <a href="{% url 'contact' %}">Contact</a>
+        </li>
+
+    </ul>
+    <!-- /NAV -->
+</div>
+
+				
 				<!-- /responsive-nav -->
 			</div>
 			<!-- /container -->
@@ -252,13 +275,16 @@ select option {
 					<!-- shop -->
 					<div class="col-md-4 col-xs-6">
 						<div class="shop">
-							<div class="shop-img">
-								<img src="{% static 'img/shop01.png' %}" alt="">
+							<div class="shop-img" style="position:relative;height:200px;overflow:hidden;">
+								<img src="{% static 'img/shop01.png' %}" alt=""  style="position:absolute;top:50%;left:50%;
+                    width:100%;height:100%;
+                    object-fit:cover;
+                    transform:translate(-50%,-50%);">>
 
 							</div>
 							<div class="shop-body">
 								<h3>Laptop<br>Collection</h3>
-								<a href="{% url 'store' %}?category=2" class="cta-btn">Shop now <i class="fa fa-arrow-circle-right"></i></a>
+								<a href="{% url 'store' %}?category=Laptops" class="cta-btn">Shop now <i class="fa fa-arrow-circle-right"></i></a>
 							</div>
 						</div>
 					</div>
@@ -267,12 +293,15 @@ select option {
 					<!-- shop -->
 					<div class="col-md-4 col-xs-6">
 						<div class="shop">
-							<div class="shop-img">
-								<img src="{% static 'img/shop03.png' %}" alt="">
+							<div class="shop-img" style="position:relative;height:200px;overflow:hidden;">
+								<img src="{% static 'img/shop03.png' %}" alt=""  style="position:absolute;top:50%;left:50%;
+                    width:100%;height:100%;
+                    object-fit:cover;
+                    transform:translate(-50%,-50%);">>
 							</div>
 							<div class="shop-body">
 								<h3>Accessories<br>Collection</h3>
-								<a href="#" class="cta-btn">Shop now <i class="fa fa-arrow-circle-right"></i></a>
+								<a href="{% url 'store' %}?category=Accessories" class="cta-btn">Shop now <i class="fa fa-arrow-circle-right"></i></a>
 							</div>
 						</div>
 					</div>
@@ -281,12 +310,15 @@ select option {
 					<!-- shop -->
 					<div class="col-md-4 col-xs-6">
 						<div class="shop">
-							<div class="shop-img">
-								<img src="{% static 'img/shop02.png' %}" alt="">
+							<div class="shop-img" style="position:relative;height:200px;overflow:hidden;">
+								<img src="{% static 'img/download.jfif' %}" alt=""   style="position:absolute;top:50%;left:50%;
+                    width:100%;height:100%;
+                    object-fit:cover;
+                    transform:translate(-50%,-50%);">
 							</div>
 							<div class="shop-body">
-								<h3>Cameras<br>Collection</h3>
-								<a href="#" class="cta-btn">Shop now <i class="fa fa-arrow-circle-right"></i></a>
+								<h3>Mobile<br>Collection</h3>
+								<a href="{% url 'store' %}?category=Mobile" class="cta-btn">Shop now <i class="fa fa-arrow-circle-right"></i></a>
 							</div>
 						</div>
 					</div>
@@ -298,52 +330,40 @@ select option {
 		</div>
 		<!-- /SECTION -->
 
-		
-		<!-- HOT DEAL SECTION -->
-		<div id="hot-deal" class="section">
-			<!-- container -->
-			<div class="container">
-				<!-- row -->
-				<div class="row">
-					<div class="col-md-12">
-						<div class="hot-deal">
-							<ul class="hot-deal-countdown">
-								<li>
-									<div>
-										<h3>02</h3>
-										<span>Days</span>
-									</div>
-								</li>
-								<li>
-									<div>
-										<h3>10</h3>
-										<span>Hours</span>
-									</div>
-								</li>
-								<li>
-									<div>
-										<h3>34</h3>
-										<span>Mins</span>
-									</div>
-								</li>
-								<li>
-									<div>
-										<h3>60</h3>
-										<span>Secs</span>
-									</div>
-								</li>
-							</ul>
-							<h2 class="text-uppercase">hot deal this week</h2>
-							<p>New Collection Up to 50% OFF</p>
-							<a class="primary-btn cta-btn" href="#">Shop now</a>
-						</div>
-					</div>
-				</div>
-				<!-- /row -->
-			</div>
-			<!-- /container -->
-		</div>
-		<!-- /HOT DEAL SECTION -->
+		{% if deal %}
+<div id="hot-deal" class="section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="hot-deal">
+
+                    <ul class="hot-deal-countdown"
+                        id="countdown"
+                        data-end="{{ deal.end_time|date:'Y-m-d H:i:s' }}">
+
+                        <li><div><h3 id="days">00</h3><span>Days</span></div></li>
+                        <li><div><h3 id="hours">00</h3><span>Hours</span></div></li>
+                        <li><div><h3 id="mins">00</h3><span>Mins</span></div></li>
+                        <li><div><h3 id="secs">00</h3><span>Secs</span></div></li>
+
+                    </ul>
+
+                    <h2 class="text-uppercase">{{ deal.title }}</h2>
+                    <p>{{ deal.subtitle }}</p>
+
+                   <a class="primary-btn cta-btn"
+   href="{% url 'hot_deal_products' deal.id %}">
+   Shop Now
+</a>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+
 
 		<!-- SECTION -->
 		<div class="section">
@@ -701,6 +721,36 @@ function toggleDashboard(event) {
         menu.style.display = "block";
     }
 }
+
+
 </script>
+<script>
+const countdown = document.getElementById("countdown");
+
+if (countdown) {
+    const endDate = new Date(countdown.dataset.end.replace(" ", "T")).getTime();
+
+    setInterval(() => {
+        const now = new Date().getTime();
+        const diff = endDate - now;
+
+        if (diff <= 0) return;
+
+        document.getElementById("days").innerText =
+            Math.floor(diff / (1000 * 60 * 60 * 24));
+
+        document.getElementById("hours").innerText =
+            Math.floor((diff / (1000 * 60 * 60)) % 24);
+
+        document.getElementById("mins").innerText =
+            Math.floor((diff / (1000 * 60)) % 60);
+
+        document.getElementById("secs").innerText =
+            Math.floor((diff / 1000) % 60);
+
+    }, 1000);
+}
+</script>
+
 	</body>
 </html>

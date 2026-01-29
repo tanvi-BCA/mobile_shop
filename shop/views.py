@@ -10,6 +10,8 @@ from .forms import UserProfileForm
 from django.template.loader import render_to_string
 from django.template.loader import get_template
 from xhtml2pdf import pisa
+from django.utils import timezone
+from .models import HotDeal
 
 from django.contrib.auth import get_user_model
 from .forms import CustomLoginForm, RegisterForm
@@ -56,6 +58,27 @@ def dashboard(request):
 #---------Email--------------
 
 
+def hot_deal_products(request, deal_id):
+    deal = get_object_or_404(
+        HotDeal,
+        id=deal_id,
+        is_active=True,
+        end_time__gt=timezone.now()
+    )
+    products = deal.products.all()
+
+    return render(request, 'hot_deal_products.html', {
+        'deal': deal,
+        'products': products
+    })
+
+def product_detail(request, id):
+    product = get_object_or_404(Product, id=id)
+    return render(request, 'product_detail.html', {
+        'product': product
+    })
+
+
 def register_view(request):
     if request.method == "POST":
         form = RegisterForm(request.POST)
@@ -85,13 +108,19 @@ def register_view(request):
 
 # ---------- HOME / DASHBOARD ----------
 
-def index(request):   # or index / store je function che
+def index(request):
     categories = ProductCategory.objects.all()
     products = Product.objects.all()
 
+    deal = HotDeal.objects.filter(
+        is_active=True,
+        end_time__gt=timezone.now()
+    ).first()
+
     return render(request, 'index.html', {
         'categories': categories,
-        'products': products
+        'products': products,
+        'deal': deal,   # 🔥 THIS IS THE KEY
     })
 
 
@@ -105,19 +134,42 @@ def category_products(request, id):
     })
 
 def store(request):
-    categories = ProductCategory.objects.all()
     products = Product.objects.all()
 
-    category_id = request.GET.get('category')
+    category = request.GET.get('category')
 
-    if category_id:
-        products = products.filter(category_id=category_id)
+    if category:
+        if category == "Accessories":
+            accessories_categories = [
+                "Powerbank",
+                "Earphone",
+                "Charger",
+                "Mobile Cover",
+            ]
+
+            products = products.filter(
+                category__category_name__in=accessories_categories
+            )
+        else:
+            products = products.filter(
+                category__category_name=category
+            )
 
     return render(request, 'store.html', {
-        'categories': categories,
         'products': products
     })
 
+
+
+def home(request):
+    deal = HotDeal.objects.filter(
+        is_active=True,
+        end_time__gt=timezone.now()
+    ).first()
+
+    return render(request, 'home.html', {
+        'deal': deal
+    })
 
 
 def contact(request):
@@ -272,35 +324,57 @@ def checkout(request):
     return render(request, 'checkout.html', context)
 
 
-
-# ---------- CART ----------
 @login_required
 def cart(request):
     cart_items = Cart.objects.filter(user=request.user)
-    
-    # Calculate total_price for each item
-    for item in cart_items:
-        item.total_price = item.product.price * item.quantity
 
-    # Calculate subtotal
-    subtotal = sum(item.total_price for item in cart_items)
-    total = subtotal  # For now, can add shipping & tax later
+    subtotal = 0
+    discount_total = 0
+
+    for item in cart_items:
+        product = item.product
+
+        original_price = product.mrp if product.mrp else product.price
+
+        if product.discount_percent() > 0:
+            discounted_price = product.discounted_price()
+            discount_total += (original_price - discounted_price) * item.quantity
+            price = discounted_price
+        else:
+            price = original_price
+
+        item.unit_price = price
+        item.total_price = price * item.quantity
+        subtotal += item.total_price
+
+    total = subtotal
 
     context = {
         'cart_items': cart_items,
         'subtotal': subtotal,
+        'discount_total': discount_total,
         'total': total
     }
     return render(request, 'cart.html', context)
 
 @login_required
-def add_to_cart(request, product_id):
-    product = get_object_or_404(Product, id=product_id)
-    cart_item, created = Cart.objects.get_or_create(user=request.user, product=product)
+def add_to_cart(request, id):
+    product = get_object_or_404(Product, id=id)
+
+    # check already cart ma che ke nahi
+    cart_item, created = Cart.objects.get_or_create(
+        user=request.user,
+        product=product
+    )
+
     if not created:
         cart_item.quantity += 1
-        cart_item.save()
-    return redirect('store')
+    else:
+        cart_item.quantity = 1
+
+    cart_item.save()
+    return redirect('cart')
+
 
 @login_required
 def decrease_quantity(request, product_id):

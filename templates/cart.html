@@ -170,17 +170,35 @@
 			<!-- container -->
 			<div class="container">
 				<!-- responsive-nav -->
-				<div id="responsive-nav">
-					<!-- NAV -->
-					<ul class="main-nav nav navbar-nav">
-						<li class="active"><a href="{% url 'index' %}">Home</a></li>
-						<li><a href="{% url 'store' %}">Shop</a></li>
-						<li><a href="{% url 'cart' %}">Cart</a></li>
-						<li><a href="{% url 'checkout' %}">Checkout</a></li>
-						<li><a href="{% url 'contact' %}">Contact</a></li>
-					</ul>
-					<!-- /NAV -->
-				</div>
+				<!-- responsive-nav -->
+<div id="responsive-nav">
+    <!-- NAV -->
+    <ul class="main-nav nav navbar-nav">
+
+        <li class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}">
+            <a href="{% url 'index' %}">Home</a>
+        </li>
+
+        <li class="{% if request.resolver_match.url_name == 'store' %}active{% endif %}">
+            <a href="{% url 'store' %}">Shop</a>
+        </li>
+
+        <li class="{% if request.resolver_match.url_name == 'cart' %}active{% endif %}">
+            <a href="{% url 'cart' %}">Cart</a>
+        </li>
+
+        <li class="{% if request.resolver_match.url_name == 'checkout' %}active{% endif %}">
+            <a href="{% url 'checkout' %}">Checkout</a>
+        </li>
+
+        <li class="{% if request.resolver_match.url_name == 'contact' %}active{% endif %}">
+            <a href="{% url 'contact' %}">Contact</a>
+        </li>
+
+    </ul>
+    <!-- /NAV -->
+</div>
+
 				<!-- /responsive-nav -->
 			</div>
 			<!-- /container -->
@@ -251,23 +269,37 @@
             <tr>
                 <th style="color: black;">Subtotal</th>
                 <td class="text-end" style="color: black;"
-				>₹{{ subtotal|default:"0.00" }}</td>
+				> ₹ {{ subtotal|floatformat:2 }}</td>
             </tr>
-            <tr>
-                <th style="color: black;">Shipping</th>
-                <td class="text-end" style="color: black;">TBD</td>
-            </tr>
-            <tr>
-                <th style="color: black;">Tax</th>
-                <td class="text-end" style="color: black;">TBD</td>
-            </tr>
+			  {% if discount_total > 0 %}
+        <tr>
+            <th style="color:green;">Discount</th>
+            <td class="text-end" style="color:green;">
+                − ₹ {{ discount_total|floatformat:2 }}
+            </td>
+        </tr>
+        {% endif %}
+              <tr>
+            <th style="color:black;">Shipping</th>
+            <td class="text-end" style="color:black;">
+                <span class="text-success">FREE</span>
+            </td>
+        </tr>
+           
             <tr class="table-light">
-                <th><strong>Estimated Total</strong></th>
-                <td class="text-end"><strong>₹{{ total|default:"0.00" }}</strong></td>
-            </tr>
+            <th><strong>Estimated Total</strong></th>
+            <td class="text-end">
+                <strong>₹ {{ total|floatformat:2 }}</strong>
+            </td>
+        </tr>
         </tbody>
     </table>
 
+{% if discount_total > 0 %}
+<p class="text-success fw-bold text-center">
+    🎉 You saved ₹ {{ discount_total|floatformat:2 }} on this order!
+</p>
+{% endif %}
 <div class="d-flex justify-content-center">
     <a href="{% url 'checkout' %}" 
        class="btn btn-outline-danger w-100 text-center fw-bold">

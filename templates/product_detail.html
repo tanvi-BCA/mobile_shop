@@ -1,0 +1,23 @@
+<h2>{{ product.product_name }}</h2>
+
+{% if product.image %}
+<img src="{{ product.image.url }}" width="250">
+{% endif %}
+
+<p>{{ product.description }}</p>
+
+{% if product.discount_percent %}
+    <p>
+        <del>₹ {{ product.mrp }}</del>
+        <strong style="color:red;"> ₹ {{ product.discounted_price }}</strong>
+    </p>
+    <p style="color:green;">{{ product.discount_percent }}% OFF</p>
+{% else %}
+    <p><strong>₹ {{ product.price }}</strong></p>
+{% endif %}
+
+<p>⏰ Limited time offer</p>
+
+<a href="{% url 'add_to_cart' product.id %}">
+    Add to Cart
+</a>

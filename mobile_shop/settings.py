@@ -25,7 +25,8 @@ SECRET_KEY = 'django-insecure-r=-w-ik-=7*rbuxij3@n2ty66jnvtoc%h@d4zc48lpfjdb3al5
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['192.168.1.5', 'localhost', '127.0.0.1']
+
 
 
 # Application definition
@@ -54,6 +55,8 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'mobile_shop.urls'
 
+
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -65,13 +68,11 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-
-                'shop.context_processors.categories_processor',
             ],
         },
-        
     },
 ]
+
 
 WSGI_APPLICATION = 'mobile_shop.wsgi.application'
 
@@ -192,8 +193,8 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 #-------email-------
 
 ADMIN_LOGIN_TEMPLATE = "admin/custom_login.html"
-LOGIN_URL = "/admin-login/"
-LOGOUT_REDIRECT_URL = "/admin-login/"
+LOGIN_URL = "/login/"
+LOGOUT_REDIRECT_URL = "/login/"
 
 # 🛒 Cart Limits
 MAX_CART_QTY_PER_ITEM = 6

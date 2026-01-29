@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 from .views import user_login, admin_login
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -9,6 +10,8 @@ urlpatterns = [
     path('login/', user_login, name='login'),
     path('admin-login/', admin_login, name='admin_login'),
     path('logout/', views.logout_view, name='logout'),
+    path('hot-deal/<int:deal_id>/', views.hot_deal_products, name='hot_deal_products'),
+     path('product/<int:id>/', views.product_detail, name='product_detail'),
 
     # 🧭 Pages
     path('dashboard/', views.dashboard, name='dashboard'),
@@ -27,7 +30,7 @@ urlpatterns = [
     path('cart/', views.cart, name='cart'),
     path('category/<int:id>/', views.category_products, name='category_products'),
     path('checkout/', views.checkout, name='checkout'),
-    path('add-to-cart/<int:product_id>/', views.add_to_cart, name='add_to_cart'),
+    path('add-to-cart/<int:id>/', views.add_to_cart, name='add_to_cart'),
     path('remove-from-cart/<int:product_id>/', views.remove_from_cart, name='remove_from_cart'),
     path('increase-quantity/<int:product_id>/', views.increase_quantity, name='increase_quantity'),
     path('decrease-quantity/<int:product_id>/', views.decrease_quantity, name='decrease_quantity'),
@@ -46,4 +49,24 @@ urlpatterns = [
 
     # 🧾 Invoice
     path('invoice-a4/<int:order_id>/', views.invoice_a4, name='invoice_a4'),
+
+    path('forgot-password/', auth_views.PasswordResetView.as_view(
+        template_name='auth/forgot_password.html'
+    ), name='password_reset'),
+
+    path('reset-password-sent/', auth_views.PasswordResetDoneView.as_view(
+        template_name='auth/password_reset_done.html'
+    ), name='password_reset_done'),
+
+     path(
+        'reset/<uidb64>/<token>/',
+        auth_views.PasswordResetConfirmView.as_view(),
+        name='password_reset_confirm'
+    ),
+
+    path(
+        'reset/complete/',
+        auth_views.PasswordResetCompleteView.as_view(),
+        name='password_reset_complete'
+    ),
 ]

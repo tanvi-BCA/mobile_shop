@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.admin import AdminSite
 from django.contrib.auth.admin import UserAdmin as DefaultUserAdmin
 from .models import UserProfile
+from .models import HotDeal
 
 User = get_user_model()
 
@@ -58,6 +59,11 @@ class OrderAdmin(admin.ModelAdmin):
 
 class OrderItemAdmin(admin.ModelAdmin):
     list_display = ('order', 'product', 'quantity', 'price')
+
+@admin.register(HotDeal)
+class HotDealAdmin(admin.ModelAdmin):
+    filter_horizontal = ('products',)
+
 
 # ----------------------
 # Register all other models (once each!)
