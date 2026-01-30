@@ -1,0 +1,22 @@
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<button id="pay">Pay Now</button>
+
+<script>
+var options = {
+    "key": "rzp_test_xxxxx",
+    "amount": "{{ order.amount }}",
+    "currency": "INR",
+    "order_id": "{{ order.id }}",
+    "name": "College Project",
+    "description": "Test Payment",
+    "handler": function (response){
+        alert("Payment Success");
+    }
+};
+
+var rzp = new Razorpay(options);
+document.getElementById('pay').onclick = function(){
+    rzp.open();
+};
+</script>

@@ -1,0 +1,16 @@
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+var options = {
+    "key": "{{ razorpay_key }}",
+    "amount": "{{ order.total_amount|floatformat:0 }}00",
+    "currency": "INR",
+    "name": "Mobile Shop",
+    "order_id": "{{ order.razorpay_order_id }}",
+    "handler": function (response){
+        window.location.href = "{% url 'payment_success' order.id %}";
+    }
+};
+var rzp = new Razorpay(options);
+rzp.open();
+</script>

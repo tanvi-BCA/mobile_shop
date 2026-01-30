@@ -1,3 +1,4 @@
+import razorpay
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
@@ -12,6 +13,7 @@ from django.template.loader import get_template
 from xhtml2pdf import pisa
 from django.utils import timezone
 from .models import HotDeal
+from .models import NewsletterSubscriber
 
 from django.contrib.auth import get_user_model
 from .forms import CustomLoginForm, RegisterForm
@@ -78,33 +80,29 @@ def product_detail(request, id):
         'product': product
     })
 
-
 def register_view(request):
     if request.method == "POST":
         form = RegisterForm(request.POST)
 
         if form.is_valid():
-            user = form.save()   # 👈 USER CREATE
+            user = form.save()
 
-            # 📧 EMAIL SEND — AA J JAGYA
             send_mail(
                 "Welcome to Mobile Shop",
                 "Registration successful. Please login.",
                 settings.DEFAULT_FROM_EMAIL,
-                [user.email],     # 👈 USER NO EMAIL
+                [user.email],
                 fail_silently=False
             )
 
             messages.success(request, "Registration successful. Please login.")
             return redirect('login')
 
-        else:
-            messages.error(request, "Username or Email already exists")
-
     else:
         form = RegisterForm()
 
     return render(request, 'register.html', {'form': form})
+
 
 # ---------- HOME / DASHBOARD ----------
 
@@ -127,38 +125,52 @@ def index(request):
 def category_products(request, id):
     category = get_object_or_404(ProductCategory, id=id)
     products = Product.objects.filter(category=category)
+    categories = ProductCategory.objects.all()
 
-    return render(request, 'category_products.html', {
-        'category': category,
-        'products': products
+    return render(request, 'index.html', {
+        'categories': categories,
+        'products': products,
+        'selected_category': category
     })
+
 
 def store(request):
     products = Product.objects.all()
+    categories = ProductCategory.objects.all()
 
-    category = request.GET.get('category')
+    category_id = request.GET.get('category')
+    search_query = request.GET.get('q')
 
-    if category:
-        if category == "Accessories":
-            accessories_categories = [
-                "Powerbank",
-                "Earphone",
-                "Charger",
-                "Mobile Cover",
-            ]
+    if category_id:
+        products = products.filter(category_id=category_id)
 
-            products = products.filter(
-                category__category_name__in=accessories_categories
-            )
+    if search_query:
+        products = products.filter(product_name__icontains=search_query)
+
+    context = {
+        'products': products,
+        'categories': categories,
+    }
+    return render(request, 'store.html', context)
+
+
+
+def newsletter_subscribe(request):
+    if request.method == "POST":
+        email = request.POST.get("email")
+
+        if not email:
+            messages.error(request, "Email is required")
+            return redirect(request.META.get('HTTP_REFERER'))
+
+        obj, created = NewsletterSubscriber.objects.get_or_create(email=email)
+
+        if created:
+            messages.success(request, "Subscribed successfully 🎉")
         else:
-            products = products.filter(
-                category__category_name=category
-            )
+            messages.warning(request, "Email already subscribed")
 
-    return render(request, 'store.html', {
-        'products': products
-    })
-
+        return redirect(request.META.get('HTTP_REFERER'))
 
 
 def home(request):
@@ -167,7 +179,7 @@ def home(request):
         end_time__gt=timezone.now()
     ).first()
 
-    return render(request, 'home.html', {
+    return render(request, 'index.html', {
         'deal': deal
     })
 
@@ -195,7 +207,6 @@ def user_login(request):
 
 # ---------- REGISTER ----------
 
-from django.contrib import messages
 
 def register_view(request):
     if request.method == "POST":
@@ -310,18 +321,57 @@ def product_list(request):
 # ---------- CHECKOUT ----------
 @login_required
 def checkout(request):
-    cart_items = Cart.objects.filter(user=request.user)  # fetch logged-in user's cart
-    
-    for item in cart_items:
-        item.total_price = item.product.price * item.quantity  # add total_price attribute
+    cart_items = Cart.objects.filter(user=request.user)
+    if not cart_items.exists():
+        return redirect('cart')
 
-    total = sum(item.total_price for item in cart_items)
+    total = sum(item.product.price * item.quantity for item in cart_items)
 
-    context = {
+    if request.method == 'POST':
+        order = Order.objects.create(
+            user=request.user,
+            first_name=request.POST['first_name'],
+            last_name=request.POST['last_name'],
+            email=request.POST['email'],
+            address=request.POST['address'],
+            city=request.POST['city'],
+            country=request.POST['country'],
+            zip_code=request.POST['zip_code'],
+            phone=request.POST['phone'],
+            payment_method=request.POST['payment_method'],
+            total_amount=total
+        )
+
+        for item in cart_items:
+            OrderItem.objects.create(
+                order=order,
+                product=item.product,
+                quantity=item.quantity,
+                price=item.product.price
+            )
+
+        cart_items.delete()
+        return redirect('order_success')
+
+    return render(request, 'checkout.html', {
         'cart_items': cart_items,
-        'total': total,
-    }
-    return render(request, 'checkout.html', context)
+        'total': total
+    })
+
+@login_required
+def my_orders(request):
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'my_orders.html', {'orders': orders})
+
+@login_required
+def return_order(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+
+    if order.status == 'delivered':
+        order.status = 'returned'
+        order.save()
+
+    return redirect('my_orders')
 
 
 @login_required
@@ -471,57 +521,32 @@ def move_wishlist_to_cart(request, product_id):
     return redirect('wishlist')
 
 
-
-
 @login_required
 def place_order(request):
     if request.method == 'POST':
-        # Check if terms accepted
-        if not request.POST.get('terms'):
-            messages.error(request, "Accept terms to place order")
-            return redirect('checkout')
 
-        # Get billing info
-        first_name = request.POST.get('first_name')
-        last_name = request.POST.get('last_name')
-        email = request.POST.get('email')
-        address = request.POST.get('address')
-        city = request.POST.get('city')
-        country = request.POST.get('country')
-        zip_code = request.POST.get('zip_code')
-        phone = request.POST.get('phone')
-
-        # Get shipping info (if empty, use billing)
-        shipping_address = request.POST.get('shipping_address') or address
-        shipping_city = request.POST.get('shipping_city') or city
-        shipping_country = request.POST.get('shipping_country') or country
-        shipping_zip = request.POST.get('shipping_zip') or zip_code
-        shipping_phone = request.POST.get('shipping_phone') or phone
-
-        # Payment method
-        payment_method = request.POST.get('payment_method')
-
-        # Get cart items
         cart_items = Cart.objects.filter(user=request.user)
         if not cart_items.exists():
             messages.error(request, "Cart is empty")
             return redirect('checkout')
 
-        # Create order
+        payment_method = request.POST.get('payment_method')
+
         order = Order.objects.create(
             user=request.user,
-            first_name=first_name,
-            last_name=last_name,
-            email=email,
-            address=address,
-            city=city,
-            country=country,
-            zip_code=zip_code,
-            phone=phone,
+            first_name=request.POST.get('first_name'),
+            last_name=request.POST.get('last_name'),
+            email=request.POST.get('email'),
+            address=request.POST.get('address'),
+            city=request.POST.get('city'),
+            country=request.POST.get('country'),
+            zip_code=request.POST.get('zip_code'),
+            phone=request.POST.get('phone'),
             payment_method=payment_method,
+            is_paid=False
         )
 
-        # Add order items
+        total = 0
         for item in cart_items:
             OrderItem.objects.create(
                 order=order,
@@ -529,19 +554,41 @@ def place_order(request):
                 quantity=item.quantity,
                 price=item.product.price
             )
+            total += item.product.price * item.quantity
 
-        # Clear cart
-        cart_items.delete()
+        # ✅ COD FLOW
+        if payment_method == "cod":
+            cart_items.delete()
+            order.is_paid = False
+            order.save()
+            return redirect('order_success', order_id=order.id)
 
-        # Redirect to success page with order ID
-        return redirect('order_success', order_id=order.id)
+        # ✅ UPI FLOW (Razorpay)
+        if payment_method == "upi":
+            client = razorpay.Client(
+                auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
+            )
 
-    return redirect('invoice_a4', order_id=order.id)
+            razorpay_order = client.order.create({
+                "amount": int(total * 100),  # paise
+                "currency": "INR",
+                "payment_capture": 1
+            })
 
+            order.razorpay_order_id = razorpay_order['id']
+            order.total_amount = total
+            order.save()
 
+            return redirect('razorpay_payment', order_id=order.id)
 
+    return redirect('checkout')
+
+def payment_failed(request):
+    return render(request, 'payment_failed.html')
 
 def order_success(request, order_id):
     order = get_object_or_404(Order, id=order_id)
     return render(request, 'order_success.html', {'order': order})
 
+def about(request):
+    return render(request, 'about.html')

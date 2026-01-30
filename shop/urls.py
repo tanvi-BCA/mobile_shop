@@ -25,6 +25,9 @@ urlpatterns = [
     path('invoice-pdf/<int:order_id>/', views.download_invoice_pdf, name='download_invoice_pdf'),
 
     path('my-address/', views.my_address, name='my_address'),
+    path('newsletter/subscribe/', views.newsletter_subscribe, name='newsletter_subscribe'),
+    path('about/', views.about, name='about'),
+    
 
     # 🛒 Cart & Checkout
     path('cart/', views.cart, name='cart'),
@@ -45,7 +48,11 @@ urlpatterns = [
     path('order-list/', views.order_list, name='order_list'),
     path('order-status/', views.order_status, name='order_status'),
     path('place-order/', views.place_order, name='place_order'),
+      path('payment-failed/', views.payment_failed, name='payment_failed'),
     path('order-success/<int:order_id>/', views.order_success, name='order_success'),
+   path('my_orders/', views.my_orders, name='my_orders'),
+
+    path('return-order/<int:order_id>/', views.return_order, name='return_order'),
 
     # 🧾 Invoice
     path('invoice-a4/<int:order_id>/', views.invoice_a4, name='invoice_a4'),

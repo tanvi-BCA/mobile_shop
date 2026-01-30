@@ -105,17 +105,26 @@
 
 						<!-- SEARCH BAR -->
 						<div class="col-md-6">
-							<div class="header-search">
+							<div class="header-search fix-dropdown">
+								
 								<form method="get" action="{% url 'store' %}">
 									 <select name="category" onchange="this.form.submit()" class="input-select">
         <option value="">All Categories</option>
 
         {% for cat in categories %}
-            <option value="{{ cat.id }}">{{ cat.category_name }}</option>
+            <option value="{{ cat.id }}"
+                {% if request.GET.category == cat.id|stringformat:"s" %}
+                    selected
+                {% endif %}>
+                {{ cat.category_name }}
+            </option>
 
         {% endfor %}
     </select>
-									<input class="input" placeholder="Search here">
+									 <input class="input" type="text" name="q"
+           placeholder="Search here"
+           value="{{ request.GET.q }}">
+
 									<button class="search-btn">Search</button>
 								</form>
 							</div>
@@ -128,7 +137,7 @@
 								<!-- Wishlist -->
 								<div>
 									<a href="{% url 'wishlist' %}">
-										<i class="fa fa-shopping-cart"></i>
+										<i class="fa fa-heart-o"></i>
 										<span>Your Wishlist</span>
 										
 									</a>
@@ -204,58 +213,59 @@
 			<!-- /container -->
 		</nav>
 		<!-- /NAVIGATION -->
-
 <div class="container mt-4">
 
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
 
-        {% for product in products %}
-        <div class="col">
-            <div class="card h-100 shadow-sm">
+        {% if products %}
+            {% for product in products %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
 
-                {% if product.image %}
-                <img src="{{ product.image.url }}"
-                     class="card-img-top"
-                     style="height:180px; object-fit:contain;">
-                {% endif %}
+                        {% if product.image %}
+                            <img src="{{ product.image.url }}"
+                                 class="card-img-top"
+                                 style="height:180px; object-fit:contain;">
+                        {% endif %}
 
-                <div class="card-body d-flex flex-column text-center">
-                    <h6 class="card-title">{{ product.name }}</h6>
-                    <p class="fw-bold">₹{{ product.price }}</p>
-					  <!-- Category -->
-   
+                        <div class="card-body d-flex flex-column text-center">
+                            <h6 class="card-title">{{ product.product_name }}</h6>
+                            <p class="fw-bold">₹{{ product.price }}</p>
 
-                   {% if user.is_authenticated %}
-<div class="mt-auto">
+                            {% if user.is_authenticated %}
+                            <div class="mt-auto">
 
-    <form action="{% url 'add_to_cart' product.id %}" method="post">
-        {% csrf_token %}
-        <button class="btn add-to-cart btn-sm w-100 mb-2">
-            Add to Cart
-        </button>
-    </form>
+                                <form action="{% url 'add_to_cart' product.id %}" method="post">
+                                    {% csrf_token %}
+                                    <button class="btn add-to-cart btn-sm w-100 mb-2">
+                                        Add to Cart
+                                    </button>
+                                </form>
 
-    <form action="{% url 'add_to_wishlist' product.id %}" method="post">
-        {% csrf_token %}
-        <button class="btn add-to-wishlist btn-sm w-100">
-            Add to Wishlist
-        </button>
-    </form>
+                                <form action="{% url 'add_to_wishlist' product.id %}" method="post">
+                                    {% csrf_token %}
+                                    <button class="btn add-to-wishlist btn-sm w-100">
+                                        Add to Wishlist
+                                    </button>
+                                </form>
 
-</div>
-{% endif %}
+                            </div>
+                            {% endif %}
 
+                        </div>
+                    </div>
                 </div>
-
+            {% endfor %}
+        {% else %}
+            <!-- ✅ NO PRODUCTS FOUND -->
+            <div class="col-12 text-center">
+                <h4>No products found</h4>
             </div>
-        </div>
-        {% endfor %}
+        {% endif %}
 
     </div>
 
 </div>
-
-
 
         <!-- NEWSLETTER -->
 		<div id="newsletter" class="section">   
@@ -266,23 +276,28 @@
 					<div class="col-md-12">
 						<div class="newsletter">
 							<p>Sign Up for the <strong>NEWSLETTER</strong></p>
-							<form>
-								<input class="input" type="email" placeholder="Enter Your Email">
-								<button class="newsletter-btn"><i class="fa fa-envelope"></i> Subscribe</button>
-							</form>
+							<form method="POST" action="{% url 'newsletter_subscribe' %}">
+    {% csrf_token %}
+    <input
+        class="input"
+        type="email"
+        name="email"
+        placeholder="Enter Your Email"
+        required
+    >
+    <button class="newsletter-btn">
+        <i class="fa fa-envelope"></i> Subscribe
+    </button>
+</form>
 							<ul class="newsletter-follow">
 								<li>
 									<a href="#"><i class="fa fa-facebook"></i></a>
 								</li>
-								<li>
-									<a href="#"><i class="fa fa-twitter"></i></a>
-								</li>
+								
 								<li>
 									<a href="#"><i class="fa fa-instagram"></i></a>
 								</li>
-								<li>
-									<a href="#"><i class="fa fa-pinterest"></i></a>
-								</li>
+								
 							</ul>
 						</div>
 					</div>
@@ -332,7 +347,7 @@
 							<div class="footer">
 								<h3 class="footer-title">Information</h3>
 								<ul class="footer-links">
-									<li><a href="#">About Us</a></li>
+									<li><a href="{% url 'about' %}">About Us</a></li>
 									<li><a href="#">Contact Us</a></li>
 									<li><a href="#">Privacy Policy</a></li>
 									<li><a href="#">Orders and Returns</a></li>

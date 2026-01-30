@@ -104,17 +104,26 @@
 
 						<!-- SEARCH BAR -->
 						<div class="col-md-6">
-							<div class="header-search">
+							<div class="header-search fix-dropdown">
+								
 								<form method="get" action="{% url 'store' %}">
 									 <select name="category" onchange="this.form.submit()" class="input-select">
         <option value="">All Categories</option>
 
         {% for cat in categories %}
-           <option value="{{ cat.id }}">{{ cat.category_name }}</option>
+            <option value="{{ cat.id }}"
+                {% if request.GET.category == cat.id|stringformat:"s" %}
+                    selected
+                {% endif %}>
+                {{ cat.category_name }}
+            </option>
 
         {% endfor %}
     </select>
-									<input class="input" placeholder="Search here">
+									 <input class="input" type="text" name="q"
+           placeholder="Search here"
+           value="{{ request.GET.q }}">
+
 									<button class="search-btn">Search</button>
 								</form>
 							</div>
@@ -269,7 +278,13 @@
 							</div>
 							<div class="form-group">
 								<label class="form-label my-3">PIN Code<sup>*</sup></label>
-								<input class="input" type="text" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')" maxlength="6" name="PIN_code" required>
+								<input class="input" type="text"
+       inputmode="numeric"
+       oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+       maxlength="6"
+       name="zip_code"
+       required>
+
 							</div>
 							<div class="form-group">
 								<label class="form-label my-3">Telephone<sup>*</sup></label>
@@ -381,16 +396,7 @@
                 <p>Pay securely using UPI. Enter your UPI ID on the next screen</p>
             </div>
         </div>
-        <div class="input-radio">
-            <input type="radio" name="payment_method" id="payment-3" value="Credit card/ debit card">
-            <label for="payment-3">
-                <span></span>
-                Credit / Debit Card
-            </label>
-            <div class="caption">
-                <p>Pay using your card. We accept Visa, Mastercard, and Rupay.</p>
-            </div>
-        </div>
+        
     </div>
 
     <div class="input-checkbox">
@@ -400,8 +406,33 @@
             I've read and accept the <a href="#">terms & conditions</a>
         </label>
     </div>
-    <button type="submit" class="primary-btn order-submit">Place order</button>
+   <button type="button" onclick="openFakeRazorpay()">Place order</button>
 </div>
+<div id="razorpayModal" style="display:none;
+ position:fixed; top:0; left:0; width:100%; height:100%;
+ background:rgba(0,0,0,0.6); z-index:9999;">
+
+  <div style="background:#fff; width:350px; margin:100px auto;
+   padding:20px; border-radius:8px; text-align:center;">
+
+    <h3 style="color:#3399cc">Razorpay</h3>
+    <p>Pay ₹{{ total_amount }}</p>
+
+    <img src="{% static 'img/dummy.png' %}" width="200">
+
+    <br><br>
+
+    <button onclick="paymentSuccess()" style="background:green;color:white;padding:10px 20px;border:none">
+      Pay Now
+    </button>
+
+    <button onclick="paymentFail()" style="background:red;color:white;padding:10px 20px;border:none">
+      Fail
+    </button>
+
+  </div>
+</div>
+
 </div>
 </div>
 </form>
@@ -425,23 +456,28 @@
 					<div class="col-md-12">
 						<div class="newsletter">
 							<p>Sign Up for the <strong>NEWSLETTER</strong></p>
-							<form>
-								<input class="input" type="email" placeholder="Enter Your Email">
-								<button class="newsletter-btn"><i class="fa fa-envelope"></i> Subscribe</button>
-							</form>
+							<form method="POST" action="{% url 'newsletter_subscribe' %}">
+    {% csrf_token %}
+    <input
+        class="input"
+        type="email"
+        name="email"
+        placeholder="Enter Your Email"
+        required
+    >
+    <button class="newsletter-btn">
+        <i class="fa fa-envelope"></i> Subscribe
+    </button>
+</form>
 							<ul class="newsletter-follow">
 								<li>
 									<a href="#"><i class="fa fa-facebook"></i></a>
 								</li>
-								<li>
-									<a href="#"><i class="fa fa-twitter"></i></a>
-								</li>
+								
 								<li>
 									<a href="#"><i class="fa fa-instagram"></i></a>
 								</li>
-								<li>
-									<a href="#"><i class="fa fa-pinterest"></i></a>
-								</li>
+								
 							</ul>
 						</div>
 					</div>
@@ -491,7 +527,7 @@
 							<div class="footer">
 								<h3 class="footer-title">Information</h3>
 								<ul class="footer-links">
-									<li><a href="#">About Us</a></li>
+									<li><a href="{% url 'about' %}">About Us</a></li>
 									<li><a href="#">Contact Us</a></li>
 									<li><a href="#">Privacy Policy</a></li>
 									<li><a href="#">Orders and Returns</a></li>
@@ -567,6 +603,20 @@ function toggleDashboard(event) {
         menu.style.display = "block";
     }
 }
+
+function openFakeRazorpay(){
+    document.getElementById("razorpayModal").style.display = "block";
+}
+
+function paymentSuccess(){
+    window.location.href = "{% url 'order_success' order_id=order.id %}";
+}
+
+function paymentFail(){
+    window.location.href = "{% url 'payment_failed' order_id=order.id %}";
+}
+
+
 </script>
 	</body>
 </html>

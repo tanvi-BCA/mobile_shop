@@ -103,17 +103,26 @@
 
 						<!-- SEARCH BAR -->
 						<div class="col-md-6">
-							<div class="header-search">
+							<div class="header-search fix-dropdown">
+								
 								<form method="get" action="{% url 'store' %}">
 									 <select name="category" onchange="this.form.submit()" class="input-select">
         <option value="">All Categories</option>
 
         {% for cat in categories %}
-          <option value="{{ cat.id }}">{{ cat.category_name }}</option>
+            <option value="{{ cat.id }}"
+                {% if request.GET.category == cat.id|stringformat:"s" %}
+                    selected
+                {% endif %}>
+                {{ cat.category_name }}
+            </option>
 
         {% endfor %}
     </select>
-									<input class="input" placeholder="Search here">
+									 <input class="input" type="text" name="q"
+           placeholder="Search here"
+           value="{{ request.GET.q }}">
+
 									<button class="search-btn">Search</button>
 								</form>
 							</div>
@@ -231,23 +240,28 @@
 					<div class="col-md-12">
 						<div class="newsletter">
 							<p>Sign Up for the <strong>NEWSLETTER</strong></p>
-							<form>
-								<input class="input" type="email" placeholder="Enter Your Email">
-								<button class="newsletter-btn"><i class="fa fa-envelope"></i> Subscribe</button>
-							</form>
+							<form method="POST" action="{% url 'newsletter_subscribe' %}">
+    {% csrf_token %}
+    <input
+        class="input"
+        type="email"
+        name="email"
+        placeholder="Enter Your Email"
+        required
+    >
+    <button class="newsletter-btn">
+        <i class="fa fa-envelope"></i> Subscribe
+    </button>
+</form>
 							<ul class="newsletter-follow">
 								<li>
 									<a href="#"><i class="fa fa-facebook"></i></a>
 								</li>
-								<li>
-									<a href="#"><i class="fa fa-twitter"></i></a>
-								</li>
+								
 								<li>
 									<a href="#"><i class="fa fa-instagram"></i></a>
 								</li>
-								<li>
-									<a href="#"><i class="fa fa-pinterest"></i></a>
-								</li>
+								
 							</ul>
 						</div>
 					</div>
@@ -297,7 +311,7 @@
 							<div class="footer">
 								<h3 class="footer-title">Information</h3>
 								<ul class="footer-links">
-									<li><a href="#">About Us</a></li>
+									<li><a href="{% url 'about' %}">About Us</a></li>
 									<li><a href="#">Contact Us</a></li>
 									<li><a href="#">Privacy Policy</a></li>
 									<li><a href="#">Orders and Returns</a></li>

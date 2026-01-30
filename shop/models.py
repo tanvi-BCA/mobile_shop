@@ -1,6 +1,8 @@
+import razorpay
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.shortcuts import render
 
 
 # ------------------
@@ -86,6 +88,14 @@ class Product(models.Model):
     def __str__(self):
         return self.product_name
 
+class NewsletterSubscriber(models.Model):
+    email = models.EmailField(unique=True)
+    subscribed_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.email
+    
+
 # ------------------
 # CART
 # ------------------
@@ -111,24 +121,82 @@ class Wishlist(models.Model):
 # ORDER
 # ------------------
 class Order(models.Model):
+
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('confirmed', 'Confirmed'),
+        ('shipped', 'Shipped'),
+        ('delivered', 'Delivered'),
+        ('cancelled', 'Cancelled'),
+        ('returned', 'Returned'),
+    ]
+
+    PAYMENT_STATUS = [
+        ('pending', 'Pending'),
+        ('paid', 'Paid'),
+        ('failed', 'Failed'),
+        ('refunded', 'Refunded'),
+    ]
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField()
+    phone = models.CharField(max_length=20)
+
     address = models.TextField()
     city = models.CharField(max_length=50)
     country = models.CharField(max_length=50)
     zip_code = models.CharField(max_length=20)
-    phone = models.CharField(max_length=20)
+
+    total_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0   # ⭐ VERY IMPORTANT
+    )
+
     payment_method = models.CharField(max_length=50)
+    payment_status = models.CharField(
+        max_length=20,
+        choices=PAYMENT_STATUS,
+        default='pending'
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='pending'
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Order #{self.id} - {self.user}"
+
 
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
-    price = models.FloatField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+
+
+class OrderReturn(models.Model):
+    order = models.OneToOneField(Order, on_delete=models.CASCADE)
+    reason = models.TextField()
+    requested_at = models.DateTimeField(auto_now_add=True)
+    approved = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Return Order #{self.order.id}"
+
+class OrderStatusHistory(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    status = models.CharField(max_length=20)
+    changed_at = models.DateTimeField(auto_now_add=True)
+
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -137,7 +205,12 @@ class UserProfile(models.Model):
     city = models.CharField(max_length=50)
     state = models.CharField(max_length=50)
     pincode = models.CharField(max_length=10)
-    profile_image = models.ImageField(upload_to='profiles/', default='default.png')
+    profile_image = models.ImageField(
+    upload_to='profile/',
+    blank=True,
+    null=True
+)
+
 
     def __str__(self):
         return self.user.username
@@ -151,3 +224,16 @@ class HotDeal(models.Model):
 
     def __str__(self):
         return self.title
+    
+
+
+def payment(request):
+    client = razorpay.Client(auth=("rzp_test_xxxxx", "secret_xxxxx"))
+
+    order = client.order.create({
+        "amount": 10000,  # ₹100
+        "currency": "INR",
+        "payment_capture": "1"
+    })
+
+    return render(request, "payment.html", {"order": order})
