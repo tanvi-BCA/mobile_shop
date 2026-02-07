@@ -4534,38 +4534,17 @@ body{
     background: red;
     color: white;
 }
-<style>
-.reviews-wrapper {
-    margin-top: 20px;
+.page-section {
+    padding: 60px 20px;
+    background-color: #f9f9f9;
 }
 
-.review-card {
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    padding: 15px 20px;
-    margin-bottom: 15px;
+.page-section h1 {
+    margin-bottom: 20px;
+    font-size: 32px;
 }
 
-.review-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
+.page-section p, .page-section ul {
+    font-size: 16px;
+    line-height: 1.6;
 }
-
-.review-rating {
-    color: #f39c12; /* golden stars */
-}
-
-.review-body p {
-    margin: 0;
-    color: #555;
-}
-
-.review-body small {
-    display: block;
-    color: #888;
-    margin-top: 5px;
-}
-</style>

@@ -4,7 +4,63 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 import re
 from .models import UserProfile
 from .models import ProductReview
+from .models import Address
 
+
+class AddressForm(forms.ModelForm):
+    class Meta:
+        model = Address
+        fields = ['full_name', 'phone', 'address', 'city', 'state', 'country', 'pincode', 'is_default']
+        widgets = {
+            'address': forms.Textarea(attrs={'rows':2}),
+        }
+
+    # ----------------
+    # VALIDATIONS
+    # ----------------
+
+    def clean_full_name(self):
+        full_name = self.cleaned_data['full_name'].strip()
+        if len(full_name) < 3:
+            raise forms.ValidationError("Full name must be at least 3 characters.")
+        return full_name
+
+    def clean_phone(self):
+        phone = self.cleaned_data['phone'].strip()
+        pattern = r'^\+?\d{10,15}$'  # allow + and 10-15 digits
+        if not re.match(pattern, phone):
+            raise forms.ValidationError("Enter a valid phone number (10-15 digits).")
+        return phone
+
+    def clean_pincode(self):
+        pincode = self.cleaned_data['pincode'].strip()
+        if not pincode.isdigit() or len(pincode) not in [5,6,7]:  # allow 5-7 digit pin
+            raise forms.ValidationError("Enter a valid pin code (5-7 digits).")
+        return pincode
+
+    def clean_address(self):
+        address = self.cleaned_data['address'].strip()
+        if len(address) < 10:
+            raise forms.ValidationError("Address must be at least 10 characters.")
+        return address
+
+    def clean_city(self):
+        city = self.cleaned_data['city'].strip()
+        if len(city) < 2:
+            raise forms.ValidationError("Enter a valid city name.")
+        return city
+
+    def clean_state(self):
+        state = self.cleaned_data['state'].strip()
+        if len(state) < 2:
+            raise forms.ValidationError("Enter a valid state name.")
+        return state
+
+    def clean_country(self):
+        country = self.cleaned_data['country'].strip()
+        if len(country) < 2:
+            raise forms.ValidationError("Enter a valid country name.")
+        return country
 
 class UserProfileForm(forms.ModelForm):
     class Meta:

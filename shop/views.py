@@ -7,7 +7,7 @@ from .models import Product, ProductReview
 from .forms import ProductReviewForm
 from django.conf import settings
 from django.http import HttpResponse
-from .models import UserProfile
+from .models import UserProfile, Address, Order
 from .forms import UserProfileForm
 from django.template.loader import render_to_string
 from django.template.loader import get_template
@@ -17,7 +17,10 @@ from .models import HotDeal
 from .models import NewsletterSubscriber
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
+from .forms import AddressForm
+from .models import Address
 from .models import Order
+
 
 
 from django.contrib.auth import get_user_model
@@ -161,6 +164,22 @@ def register_view(request):
 
     return render(request, 'register.html', {'form': form})
 
+
+@login_required
+def add_address(request):
+    if request.method == 'POST':
+        form = AddressForm(request.POST)
+        if form.is_valid():
+            address = form.save(commit=False)
+            address.user = request.user
+            # If user marked as default, reset others
+            if address.is_default:
+                Address.objects.filter(user=request.user, is_default=True).update(is_default=False)
+            address.save()
+            return redirect('my_address')  # back to addresses page
+    else:
+        form = AddressForm()
+    return render(request, 'add_address.html', {'form': form})
 
 # ---------- HOME / DASHBOARD ----------
 
@@ -690,8 +709,6 @@ def qr_payment(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
     return render(request, 'qr_payment.html', {'order': order})
 
-def about(request):
-    return render(request, 'about.html')
 
 @login_required
 def return_order(request, order_id):
@@ -844,3 +861,30 @@ def unread_notifications(request):
 
     return JsonResponse(list(notes), safe=False)
 
+
+@login_required
+def my_account(request):
+    user = request.user
+    profile = UserProfile.objects.filter(user=user).first()  # get phone or extra info
+    addresses = Address.objects.filter(user=user)
+    orders = Order.objects.filter(user=user).order_by('-created_at')
+
+    return render(request, 'my_account.html', {
+        'user': user,
+        'profile': profile,
+        'addresses': addresses,
+        'orders': orders,
+    })
+
+
+def about(request):
+    return render(request, 'about.html')
+
+def privacy_policy(request):
+    return render(request, 'privacy_policy.html')
+
+def return_order(request):
+    return render(request, 'return_order.html')
+
+def terms_conditions(request):
+    return render(request, 'terms_conditions.html')
