@@ -57,11 +57,16 @@
 <li class="dashboard-dropdown">
     <a href="#" class="dashboard-link" onclick="toggleDashboard(event)">
         {% if user.is_authenticated %}
-            <span class="dashboard-user">
-                <img src="{{ user.userprofile.profile_image.url }}"
-                     class="header-profile-img">
-                Hi, {{ user.username }}
-            </span>
+             <span class="dashboard-user">
+
+        {% if user.userprofile.profile_image %}
+            <img src="{{ user.userprofile.profile_image.url }}"
+                 class="header-profile-img">
+        {% endif %}
+
+        Hi, {{ user.username }}
+
+    </span>
         {% else %}
             My Dashboard
         {% endif %}
@@ -70,7 +75,7 @@
     <ul class="dashboard-menu" style="display: none;">
         {% if user.is_authenticated %}
             <li><a href="{% url 'my_profile' %}">My Profile</a></li>
-            <li><a href="{% url 'my_address' %}">My Address</a></li>
+             <li><a href="{% url 'my_orders' %}">My Orders</a></li>
             <li><a href="{% url 'order_list' %}">Order List</a></li>
             <li><a href="{% url 'order_status' %}">Order Status</a></li>
             <li><a href="{% url 'logout' %}">Logout</a></li>
@@ -105,15 +110,15 @@
 						<div class="col-md-6">
 							<div class="header-search fix-dropdown">
 								
-								<form method="get" action="{% url 'store' %}">
+									<form method="GET" action="{% url 'store' %}">
 									 <select name="category" onchange="this.form.submit()" class="input-select">
         <option value="">All Categories</option>
 
         {% for cat in categories %}
-            <option value="{{ cat.id }}"
-                {% if request.GET.category == cat.id|stringformat:"s" %}
-                    selected
-                {% endif %}>
+            <option value="{{ cat.slug }}"
+                 {% if request.GET.category == cat.slug %}
+                selected
+            {% endif %}>
                 {{ cat.category_name }}
             </option>
 
@@ -178,28 +183,44 @@
 			<div class="container">
 				<!-- responsive-nav -->
 				<div id="responsive-nav">
-					<!-- NAV -->
-					<ul class="main-nav nav navbar-nav">
-						<li class="active"><a href="{% url 'index' %}">Home</a></li>
-						<li><a href="{% url 'store' %}">Shop</a></li>
-						<li><a href="{% url 'cart' %}">Cart</a></li>
-						<li><a href="{% url 'checkout' %}">Checkout</a></li>
-						<li><a href="{% url 'contact' %}">Contact</a></li>
-					</ul>
-					<!-- /NAV -->
-				</div>
+    <!-- NAV -->
+    <ul class="main-nav nav navbar-nav">
+
+        <li class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}">
+            <a href="{% url 'index' %}">Home</a>
+        </li>
+
+        <li class="{% if request.resolver_match.url_name == 'store' %}active{% endif %}">
+            <a href="{% url 'store' %}">Shop</a>
+        </li>
+
+
+        <li class="{% if request.resolver_match.url_name == 'checkout' %}active{% endif %}">
+            <a href="{% url 'checkout' %}">Checkout</a>
+        </li>
+
+        <li class="{% if request.resolver_match.url_name == 'contact' %}active{% endif %}">
+            <a href="{% url 'contact' %}">Contact</a>
+        </li>
+		 <li class="{% if request.resolver_match.url_name == 'cart' %}active{% endif %}">
+            <a href="{% url 'about' %}">About Us</a>
+        </li>
+
+    </ul>
+    <!-- /NAV -->
+</div>
 				<!-- /responsive-nav -->
 			</div>
 			<!-- /container -->
 		</nav>
 		<!-- /NAVIGATION -->
 
-		
- <h2>My Orders Status</h2>
+<h2 class="orders-title mt-4 mb-3" style="color:#ff0000;">My Orders Status</h2>
 
-    {% if orders %}
-    <table class="table table-hover table-bordered mt-3">
-        <thead>
+{% if orders %}
+<div class="table-responsive">
+    <table class="table table-hover table-bordered">
+        <thead class="table-danger">
             <tr>
                 <th>Order ID</th>
                 <th>Date</th>
@@ -213,23 +234,41 @@
         <tbody>
             {% for order in orders %}
             <tr>
-                <td>{{ order.id }}</td>
-                <td>{{ order.created_at|date:"d M Y H:i" }}</td>
+                <td>#{{ order.id }}</td>
+                <td>{{ order.created_at|date:"d M Y, H:i" }}</td>
                 <td>{{ order.items.count }}</td>
-                <td>{{ order.total|floatformat:2 }}</td>
+               <td>₹{{ order.total_amount|floatformat:2 }}</td>
+
+
                 <td>{{ order.payment_method }}</td>
-                <td>Pending</td>
                 <td>
-                    <a href="{% url 'invoice_a4' order.id %}" class="btn btn-sm btn-success" target="_blank">View Invoice</a>
+                    {% if order.status == "pending" %}
+                        <span class="badge bg-warning text-dark">Pending</span>
+                    {% elif order.status == "confirmed" %}
+                        <span class="badge bg-primary">Confirmed</span>
+                    {% elif order.status == "shipped" %}
+                        <span class="badge bg-info text-dark">Shipped</span>
+                    {% elif order.status == "delivered" %}
+                        <span class="badge bg-success">Delivered</span>
+                    {% elif order.status == "returned" %}
+                        <span class="badge bg-danger">Returned</span>
+                    {% elif order.status == "cancelled" %}
+                        <span class="badge bg-danger">Cancelled</span>
+                    {% else %}
+                        <span class="badge bg-secondary">{{ order.status|title }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'invoice_a4' order.id %}" class="btn btn-sm btn-danger" target="_blank">View Invoice</a>
                 </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
-    {% else %}
-    <p>You have not placed any orders yet.</p>
-    {% endif %}
-
+</div>
+{% else %}
+<p class="text-center mt-3">You have not placed any orders yet.</p>
+{% endif %}
 
         <!-- NEWSLETTER -->
 		<div id="newsletter" class="section">   
@@ -388,5 +427,6 @@ function toggleDashboard(event) {
     }
 }
 </script>
+
 	</body>
 </html>

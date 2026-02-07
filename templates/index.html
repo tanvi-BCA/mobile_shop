@@ -115,16 +115,14 @@ select option {
         {% if user.is_authenticated and not user.is_staff %}
             <span class="dashboard-user">
 
-                {% if user.userprofile and user.userprofile.profile_image %}
-                    <img src="{{ user.userprofile.profile_image.url }}"
-                         class="header-profile-img">
-                {% else %}
-                    <img src="{% static 'img/profile.png' %}"
-                         class="header-profile-img">
-                {% endif %}
+        {% if user.userprofile.profile_image %}
+            <img src="{{ user.userprofile.profile_image.url }}"
+                 class="header-profile-img">
+        {% endif %}
 
-                Hi, {{ user.username }}
-            </span>
+        Hi, {{ user.username }}
+
+    </span>
         {% else %}
             My Dashboard
         {% endif %}
@@ -169,15 +167,15 @@ select option {
 						<div class="col-md-6">
 							<div class="header-search fix-dropdown">
 								
-								<form method="get" action="{% url 'store' %}">
+								<form method="GET" action="{% url 'store' %}">
 									 <select name="category" onchange="this.form.submit()" class="input-select">
         <option value="">All Categories</option>
 
         {% for cat in categories %}
-            <option value="{{ cat.id }}"
-                {% if request.GET.category == cat.id|stringformat:"s" %}
-                    selected
-                {% endif %}>
+            <option value="{{ cat.slug }}"
+                 {% if request.GET.category == cat.slug %}
+                selected
+            {% endif %}>
                 {{ cat.category_name }}
             </option>
 
@@ -253,9 +251,6 @@ select option {
             <a href="{% url 'store' %}">Shop</a>
         </li>
 
-        <li class="{% if request.resolver_match.url_name == 'cart' %}active{% endif %}">
-            <a href="{% url 'cart' %}">Cart</a>
-        </li>
 
         <li class="{% if request.resolver_match.url_name == 'checkout' %}active{% endif %}">
             <a href="{% url 'checkout' %}">Checkout</a>
@@ -265,6 +260,9 @@ select option {
             <a href="{% url 'contact' %}">Contact</a>
         </li>
 
+		 <li class="{% if request.resolver_match.url_name == 'cart' %}active{% endif %}">
+            <a href="{% url 'about' %}">About Us</a>
+        </li>
     </ul>
     <!-- /NAV -->
 </div>
@@ -286,15 +284,15 @@ select option {
 					<div class="col-md-4 col-xs-6">
 						<div class="shop">
 							<div class="shop-img" style="position:relative;height:200px;overflow:hidden;">
-								<img src="{% static 'img/shop01.png' %}" alt=""  style="position:absolute;top:50%;left:50%;
+								<img src="{% static 'img/shop03.png' %}" alt=""  style="position:absolute;top:50%;left:50%;
                     width:100%;height:100%;
                     object-fit:cover;
                     transform:translate(-50%,-50%);">>
 
 							</div>
 							<div class="shop-body">
-								<h3>Laptop<br>Collection</h3>
-								<a href="{% url 'store' %}?category=Laptops" class="cta-btn">Shop now <i class="fa fa-arrow-circle-right"></i></a>
+								<h3>Headphone<br>Collection</h3>
+								<a href="{% url 'store' %}?category=headphones" class="cta-btn">Shop now <i class="fa fa-arrow-circle-right"></i></a>
 							</div>
 						</div>
 					</div>
@@ -304,14 +302,14 @@ select option {
 					<div class="col-md-4 col-xs-6">
 						<div class="shop">
 							<div class="shop-img" style="position:relative;height:200px;overflow:hidden;">
-								<img src="{% static 'img/shop03.png' %}" alt=""  style="position:absolute;top:50%;left:50%;
+								<img src="{% static 'img/shop02.png' %}" alt=""  style="position:absolute;top:50%;left:50%;
                     width:100%;height:100%;
                     object-fit:cover;
                     transform:translate(-50%,-50%);">>
 							</div>
 							<div class="shop-body">
 								<h3>Accessories<br>Collection</h3>
-								<a href="{% url 'store' %}?category=Accessories" class="cta-btn">Shop now <i class="fa fa-arrow-circle-right"></i></a>
+								<a href="{% url 'store' %}?category=mobile-accessories" class="cta-btn">Shop now <i class="fa fa-arrow-circle-right"></i></a>
 							</div>
 						</div>
 					</div>
@@ -328,7 +326,7 @@ select option {
 							</div>
 							<div class="shop-body">
 								<h3>Mobile<br>Collection</h3>
-								<a href="{% url 'store' %}?category=Mobile" class="cta-btn">Shop now <i class="fa fa-arrow-circle-right"></i></a>
+								<a href="{% url 'store' %}?category=smartphones" class="cta-btn">Shop now <i class="fa fa-arrow-circle-right"></i></a>
 							</div>
 						</div>
 					</div>

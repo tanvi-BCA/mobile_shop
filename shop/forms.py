@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 import re
 from .models import UserProfile
+from .models import ProductReview
 
 
 class UserProfileForm(forms.ModelForm):
@@ -175,3 +176,12 @@ class RegisterForm(UserCreationForm):
             raise forms.ValidationError("Password must contain one special character")
 
         return password
+    
+class ProductReviewForm(forms.ModelForm):
+    class Meta:
+        model = ProductReview
+        fields = ['rating', 'comment']
+        widgets = {
+            'rating': forms.NumberInput(attrs={'min':1, 'max':5}),
+            'comment': forms.Textarea(attrs={'rows':3, 'placeholder':'Write your review here...'}),
+        }

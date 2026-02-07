@@ -1,0 +1,12 @@
+
+{% block content %}
+
+<h3>Request Refund</h3>
+
+<form method="POST">
+    {% csrf_token %}
+    <textarea name="reason" class="form-control" placeholder="Refund reason"></textarea>
+    <button class="btn btn-danger mt-2">Submit Refund</button>
+</form>
+
+{% endblock %}

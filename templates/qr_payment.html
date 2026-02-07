@@ -1,0 +1,48 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>UPI Payment</title>
+    <style>
+        body {
+            text-align: center;      /* center everything */
+            font-family: Arial, sans-serif;
+            margin-top: 50px;
+        }
+        .qr-img {
+            width: 250px;           /* smaller QR code */
+            height: 250px;
+            margin-bottom: 20px;
+        }
+        .btn-pay {
+            padding: 12px 30px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .btn-pay:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Scan this QR code to pay for Order #{{ order.id }}</h2>
+    <p>Total Amount: ₹{{ order.total_amount }}</p>
+
+    <!-- QR code image -->
+    <img class="qr-img" src="{% static 'img/dummy_qr.png' %}" alt="UPI QR Code">
+
+    <br>
+
+    <!-- Dummy payment button -->
+    <form method="POST" action="{% url 'payment_success_dummy' order.id %}">
+        {% csrf_token %}
+        <button class="btn-pay" type="submit">Make Payment</button>
+    </form>
+
+</body>
+</html>

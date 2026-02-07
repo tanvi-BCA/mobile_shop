@@ -1,6 +1,214 @@
-<h2>Thank you {{ order.first_name }}! 🎉</h2>
-<p>Your order <strong>No. {{ order.id }}</strong> has been placed successfully.</p>
+{% load math_filters %}
 
-<a href="{% url 'invoice_a4' order.id %}">View Invoice</a>
-<br><br>
-<a href="{% url 'store' %}">Continue Shopping</a>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Success</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+        body {
+            font-family: "Segoe UI", sans-serif;
+            background: #f4f6f8;
+            margin: 0;
+            padding: 0;
+        }
+
+        .success-container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .success-header {
+            background: linear-gradient(135deg, #c7364a, #ab3654);
+            color: #fff;
+            text-align: center;
+            padding: 10px 10px;
+        }
+
+        .success-header h1 {
+            margin: 0;
+            font-size: 32px;
+        }
+
+        .success-header p {
+            margin-top: 10px;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .success-body {
+            padding: 30px;
+        }
+
+        .order-info {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        .info-box {
+            width: 40%;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .info-box h4 {
+            margin-bottom: 8px;
+            font-size: 15px;
+            color: #555;
+        }
+
+        .info-box p {
+            margin: 0;
+            font-weight: 600;
+            color: #222;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table th, table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+        }
+
+        table th {
+            background: #f1f1f1;
+            font-size: 14px;
+        }
+
+        .total-row {
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .status-paid {
+            color: green;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            color: orange;
+            font-weight: bold;
+        }
+
+        .action-buttons {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .action-buttons a {
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            margin: 0 10px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #c7364a;
+            color: #fff;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: #fff;
+        }
+
+        @media (max-width: 768px) {
+            .info-box {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="success-container">
+
+    <!-- HEADER -->
+    <div class="success-header">
+        <h1>🎉 Order Placed Successfully!</h1>
+        <p>Thank you for shopping with us</p>
+    </div>
+
+    <!-- BODY -->
+    <div class="success-body">
+
+        <!-- ORDER INFO -->
+        <div class="order-info">
+            <div class="info-box">
+                <h4>Order ID</h4>
+                <p>#{{ order.id }}</p>
+            </div>
+
+            <div class="info-box">
+                <h4>Order Date</h4>
+                <p>{{ order.created_at|date:"d M Y, h:i A" }}</p>
+            </div>
+
+            <div class="info-box">
+                <h4>Payment Method</h4>
+                <p>{{ order.payment_method }}</p>
+            </div>
+
+            <div class="info-box">
+                <h4>Payment Status</h4>
+                {% if order.is_paid %}
+                    <p class="status-paid">Paid</p>
+                {% else %}
+                    <p class="status-pending">Pending</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- ITEMS TABLE -->
+        <table>
+            <tr>
+                <th>Product</th>
+                <th>Qty</th>
+                <th>Price</th>
+                <th>Total</th>
+            </tr>
+
+           {% for item in items %}
+        <tr>
+            <td>{{ item.product.product_name }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>₹{{ item.price }}</td>
+            <td>₹{{ item.line_total }}</td>
+        </tr>
+        {% endfor %}
+
+
+            <tr class="total-row">
+                <td colspan="3">Grand Total</td>
+                <td>₹{{ order.total_amount }}</td>
+            </tr>
+        </table>
+
+        <!-- ACTIONS -->
+        <div class="action-buttons">
+            <a href="{% url 'index' %}" class="btn-primary">Continue Shopping</a>
+            <a href="{% url 'my_orders' %}" class="btn-secondary">My Orders</a>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

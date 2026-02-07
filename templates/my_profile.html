@@ -58,10 +58,15 @@
     <a href="#" class="dashboard-link" onclick="toggleDashboard(event)">
         {% if user.is_authenticated %}
             <span class="dashboard-user">
-                <img src="{{ user.userprofile.profile_image.url }}"
-                     class="header-profile-img">
-                Hi, {{ user.username }}
-            </span>
+
+        {% if user.userprofile.profile_image %}
+            <img src="{{ user.userprofile.profile_image.url }}"
+                 class="header-profile-img">
+        {% endif %}
+
+        Hi, {{ user.username }}
+
+    </span>
         {% else %}
             My Dashboard
         {% endif %}
@@ -70,7 +75,7 @@
     <ul class="dashboard-menu" style="display: none;">
         {% if user.is_authenticated %}
             <li><a href="{% url 'my_profile' %}">My Profile</a></li>
-            <li><a href="{% url 'my_address' %}">My Address</a></li>
+             <li><a href="{% url 'my_orders' %}">My Orders</a></li>
             <li><a href="{% url 'order_list' %}">Order List</a></li>
             <li><a href="{% url 'order_status' %}">Order Status</a></li>
             <li><a href="{% url 'logout' %}">Logout</a></li>
@@ -229,7 +234,13 @@
 {% else %}
     <img src="{% static 'img/profile.png' %}" class="profile-img">
 {% endif %}
+<div style="text-align:right; margin-top:20px;">
+    <a href="{% url 'edit_profile' %}" class="btn-save">
+        Edit Profile
+    </a>
 </div>
+</div>
+ 
 
       <!-- RIGHT : DETAILS -->
       <div style="flex:1">
@@ -241,6 +252,9 @@
         <p><b>State:</b> {{ profile.state }}</p>
         <p><b>Pincode:</b> {{ profile.pincode }}</p>
       </div>
+	  
+      <!-- ✅ SUBMIT BUTTON -->
+    
 
     </div>
   </div>

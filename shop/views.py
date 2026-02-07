@@ -1,9 +1,10 @@
-import razorpay
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.core.mail import send_mail
+from .models import Product, ProductReview
+from .forms import ProductReviewForm
 from django.conf import settings
 from django.http import HttpResponse
 from .models import UserProfile
@@ -14,6 +15,10 @@ from xhtml2pdf import pisa
 from django.utils import timezone
 from .models import HotDeal
 from .models import NewsletterSubscriber
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from .models import Order
+
 
 from django.contrib.auth import get_user_model
 from .forms import CustomLoginForm, RegisterForm
@@ -25,10 +30,61 @@ from .models import (
     Wishlist,
     Order,
     OrderItem,
+     Product, ProductReview, Notification,
+    Order, Refund, Payment
 )
 
 User = get_user_model()
 
+import qrcode
+from io import BytesIO
+import base64
+from django.shortcuts import render, get_object_or_404
+from .models import Order
+
+@login_required
+def qr_payment(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+
+    # ✅ Create QR code data (dummy UPI string for now)
+    upi_string = f"upi://pay?pa=merchant@upi&pn=MobileShop&am={order.total_amount}&cu=INR&tid={order.id}"
+
+    # Generate QR code
+    qr = qrcode.QRCode(version=1, box_size=10, border=4)
+    qr.add_data(upi_string)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white")
+
+    # Convert image to base64 so we can render directly in HTML
+    buffer = BytesIO()
+    img.save(buffer, format="PNG")
+    img_str = base64.b64encode(buffer.getvalue()).decode()
+
+    qr_data_uri = f"data:image/png;base64,{img_str}"
+
+    return render(request, 'shop/qr_payment.html', {
+        'order': order,
+        'qr_data_uri': qr_data_uri
+    })
+
+@login_required
+def payment_success_dummy(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+
+    # Mark order as paid (dummy)
+    order.is_paid = True
+    order.payment_status = 'paid'
+    order.status = 'confirmed'
+    order.save()
+
+    # Optional: notification
+    Notification.objects.create(
+        user=request.user,
+        message=f"Payment successful for Order #{order.id}"
+    )
+
+    messages.success(request, "Payment successful ✅")
+    return redirect('order_success', order_id=order.id)
 
 def admin_login(request):
     if request.method == "POST":
@@ -74,11 +130,13 @@ def hot_deal_products(request, deal_id):
         'products': products
     })
 
-def product_detail(request, id):
+def product_detail(request, id):  # <-- 'id' must match your urls.py
     product = get_object_or_404(Product, id=id)
-    return render(request, 'product_detail.html', {
+    context = {
         'product': product
-    })
+    }
+    return render(request, 'product_detail.html', context)
+
 
 def register_view(request):
     if request.method == "POST":
@@ -120,10 +178,8 @@ def index(request):
         'products': products,
         'deal': deal,   # 🔥 THIS IS THE KEY
     })
-
-
-def category_products(request, id):
-    category = get_object_or_404(ProductCategory, id=id)
+def category_products(request, slug):
+    category = get_object_or_404(ProductCategory, slug=slug)
     products = Product.objects.filter(category=category)
     categories = ProductCategory.objects.all()
 
@@ -134,24 +190,27 @@ def category_products(request, id):
     })
 
 
+
+
 def store(request):
     products = Product.objects.all()
     categories = ProductCategory.objects.all()
 
-    category_id = request.GET.get('category')
+    category_slug = request.GET.get('category')
     search_query = request.GET.get('q')
 
-    if category_id:
-        products = products.filter(category_id=category_id)
+    if category_slug:
+        products = products.filter(category__slug=category_slug)
 
     if search_query:
-        products = products.filter(product_name__icontains=search_query)
+         products = products.filter(product_name__icontains=search_query)
 
     context = {
         'products': products,
         'categories': categories,
     }
     return render(request, 'store.html', context)
+
 
 
 
@@ -237,12 +296,11 @@ def my_profile(request):
 
     return render(request, 'my_profile.html', {'profile': profile})
 
-
-
+@login_required
 def edit_profile(request):
     profile = UserProfile.objects.get(user=request.user)
 
-    if request.method == 'POST':
+    if request.method == "POST":
         form = UserProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             form.save()
@@ -250,7 +308,11 @@ def edit_profile(request):
     else:
         form = UserProfileForm(instance=profile)
 
-    return render(request, 'edit_profile.html', {'form': form})
+    return render(request, 'edit_profile.html', {
+        'form': form,
+        'profile': profile
+    })
+
 
 
 # ---------- MY ADDRESS ----------
@@ -271,28 +333,32 @@ def order_list(request):
 
 
 # ---------- ORDER STATUS ----------
-@login_required
+# views.py
 def order_status(request):
-    # Fetch all orders of logged-in user
-    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    orders = Order.objects.filter(user=request.user).prefetch_related('items__product')
     return render(request, 'order_status.html', {'orders': orders})
 
+
 # ---------- INVOICE A4 ----------
-@login_required
+
 def invoice_a4(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
+    items = order.items.all()  # Make sure you have a related_name="items" in OrderItem model
 
-    items = order.items.all()
-
-    grand_total = 0
+    # Calculate total for each item
     for item in items:
-        grand_total += item.quantity * item.price
+        item.total_price = item.price * item.quantity
+
+
+    # Grand total (you can use order.total_amount if already stored)
+    grand_total = order.total_amount
 
     return render(request, 'invoice_a4.html', {
         'order': order,
         'items': items,
-        'grand_total': grand_total
+        'grand': {'total': grand_total}
     })
+
 
 
 @login_required
@@ -325,53 +391,55 @@ def checkout(request):
     if not cart_items.exists():
         return redirect('cart')
 
-    total = sum(item.product.price * item.quantity for item in cart_items)
+    total = 0
+    for item in cart_items:
+        if item.product.is_hot_deal:
+            total += item.product.price * item.quantity
+        else:
+            total += item.product.mrp * item.quantity
 
     if request.method == 'POST':
+
         order = Order.objects.create(
             user=request.user,
-            first_name=request.POST['first_name'],
-            last_name=request.POST['last_name'],
-            email=request.POST['email'],
-            address=request.POST['address'],
-            city=request.POST['city'],
-            country=request.POST['country'],
-            zip_code=request.POST['zip_code'],
-            phone=request.POST['phone'],
-            payment_method=request.POST['payment_method'],
-            total_amount=total
+            first_name=request.POST.get('first_name'),
+            last_name=request.POST.get('last_name'),
+            email=request.POST.get('email'),
+            phone=request.POST.get('phone'),
+            address=request.POST.get('address'),
+            city=request.POST.get('city'),
+            country=request.POST.get('country'),
+            zip_code=request.POST.get('zip_code'),
+
+            total_amount=total,
+            payment_method='DUMMY',
+            payment_status='paid',   # ✅ dummy paid
+            is_paid=True
         )
 
         for item in cart_items:
+            price = item.product.price if item.product.is_hot_deal else item.product.mrp
+
             OrderItem.objects.create(
                 order=order,
                 product=item.product,
                 quantity=item.quantity,
-                price=item.product.price
+                price=price
             )
 
         cart_items.delete()
+
+        Notification.objects.create(
+            user=request.user,
+            message=f"Order #{order.id} placed successfully"
+        )
+
         return redirect('order_success')
 
     return render(request, 'checkout.html', {
         'cart_items': cart_items,
         'total': total
     })
-
-@login_required
-def my_orders(request):
-    orders = Order.objects.filter(user=request.user).order_by('-created_at')
-    return render(request, 'my_orders.html', {'orders': orders})
-
-@login_required
-def return_order(request, order_id):
-    order = get_object_or_404(Order, id=order_id, user=request.user)
-
-    if order.status == 'delivered':
-        order.status = 'returned'
-        order.save()
-
-    return redirect('my_orders')
 
 
 @login_required
@@ -380,24 +448,28 @@ def cart(request):
 
     subtotal = 0
     discount_total = 0
+    total = 0
 
     for item in cart_items:
         product = item.product
+        qty = item.quantity
 
-        original_price = product.mrp if product.mrp else product.price
+        # Subtotal always MRP
+        subtotal += product.mrp * qty
 
-        if product.discount_percent() > 0:
-            discounted_price = product.discounted_price()
-            discount_total += (original_price - discounted_price) * item.quantity
-            price = discounted_price
+        if product.is_hot_deal:
+            # 🔥 hot deal discount
+            discount = (product.mrp - product.price) * qty
+            discount_total += discount
+
+            item.unit_price = product.price
+            item.total_price = product.price * qty
+            total += product.price * qty
         else:
-            price = original_price
-
-        item.unit_price = price
-        item.total_price = price * item.quantity
-        subtotal += item.total_price
-
-    total = subtotal
+            # ❌ no discount
+            item.unit_price = product.mrp
+            item.total_price = product.mrp * qty
+            total += product.mrp * qty
 
     context = {
         'cart_items': cart_items,
@@ -405,25 +477,34 @@ def cart(request):
         'discount_total': discount_total,
         'total': total
     }
+
     return render(request, 'cart.html', context)
 
 @login_required
 def add_to_cart(request, id):
     product = get_object_or_404(Product, id=id)
 
-    # check already cart ma che ke nahi
+    qty = int(request.POST.get('quantity', 1))  # ⬅️ qty read
+
     cart_item, created = Cart.objects.get_or_create(
         user=request.user,
         product=product
     )
 
-    if not created:
-        cart_item.quantity += 1
+    if created:
+        cart_item.quantity = qty
     else:
-        cart_item.quantity = 1
+        cart_item.quantity += qty
 
     cart_item.save()
-    return redirect('cart')
+
+    Notification.objects.create(
+        user=request.user,
+        message=f"{product.product_name} added to cart"
+    )
+
+    return redirect('cart')   # ⬅️ store nai, cart
+
 
 
 @login_required
@@ -520,75 +601,246 @@ def move_wishlist_to_cart(request, product_id):
         cart_item.save()
     return redirect('wishlist')
 
-
 @login_required
 def place_order(request):
-    if request.method == 'POST':
+    if request.method != 'POST':
+        return redirect('checkout')
 
-        cart_items = Cart.objects.filter(user=request.user)
-        if not cart_items.exists():
-            messages.error(request, "Cart is empty")
-            return redirect('checkout')
+    cart_items = Cart.objects.filter(user=request.user)
+    if not cart_items.exists():
+        messages.error(request, "Cart is empty")
+        return redirect('checkout')
 
-        payment_method = request.POST.get('payment_method')
+    payment_method = request.POST.get('payment_method')
+    if not payment_method:
+        messages.error(request, "Please select a payment method")
+        return redirect('checkout')
 
-        order = Order.objects.create(
-            user=request.user,
-            first_name=request.POST.get('first_name'),
-            last_name=request.POST.get('last_name'),
-            email=request.POST.get('email'),
-            address=request.POST.get('address'),
-            city=request.POST.get('city'),
-            country=request.POST.get('country'),
-            zip_code=request.POST.get('zip_code'),
-            phone=request.POST.get('phone'),
-            payment_method=payment_method,
-            is_paid=False
+    # Create the order
+    order = Order.objects.create(
+        user=request.user,
+        first_name=request.POST.get('first_name'),
+        last_name=request.POST.get('last_name'),
+        email=request.POST.get('email'),
+        address=request.POST.get('address'),
+        city=request.POST.get('city'),
+        country=request.POST.get('country'),
+        zip_code=request.POST.get('zip_code'),
+        phone=request.POST.get('phone'),
+        payment_method=payment_method,
+        is_paid=False
+    )
+
+    # Add items and calculate total
+    total = 0
+    for item in cart_items:
+        OrderItem.objects.create(
+            order=order,
+            product=item.product,
+            quantity=item.quantity,
+            price=item.product.price
         )
+        total += item.product.price * item.quantity
 
-        total = 0
-        for item in cart_items:
-            OrderItem.objects.create(
-                order=order,
-                product=item.product,
-                quantity=item.quantity,
-                price=item.product.price
-            )
-            total += item.product.price * item.quantity
+    order.total_amount = total
+    order.save()
 
-        # ✅ COD FLOW
-        if payment_method == "cod":
-            cart_items.delete()
-            order.is_paid = False
-            order.save()
-            return redirect('order_success', order_id=order.id)
+    # Create notification
+    Notification.objects.create(
+        user=request.user,
+        message="Your order has been placed successfully"
+    )
 
-        # ✅ UPI FLOW (Razorpay)
-        if payment_method == "upi":
-            client = razorpay.Client(
-                auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
-            )
+    # Delete cart items
+    cart_items.delete()
 
-            razorpay_order = client.order.create({
-                "amount": int(total * 100),  # paise
-                "currency": "INR",
-                "payment_capture": 1
-            })
+    # --- Payment flow ---
+    if payment_method == "Cash On Delivery":
+        return redirect('order_success', order_id=order.id)
 
-            order.razorpay_order_id = razorpay_order['id']
-            order.total_amount = total
-            order.save()
+    elif payment_method == "UPI":
+        return redirect('qr_payment', order_id=order.id)
 
-            return redirect('razorpay_payment', order_id=order.id)
+    else:
+        # future: other payment methods
+        return redirect('order_success', order_id=order.id)
 
-    return redirect('checkout')
-
-def payment_failed(request):
-    return render(request, 'payment_failed.html')
-
+@login_required
 def order_success(request, order_id):
-    order = get_object_or_404(Order, id=order_id)
-    return render(request, 'order_success.html', {'order': order})
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+
+    items = order.items.all()   # ✅ CORRECT
+    for item in items:
+        item.line_total = item.quantity * item.price
+
+    return render(request, "order_success.html", {
+        "order": order,
+        "items": items
+    })
+
+def orders(request):
+    user_orders = Order.objects.filter(user=request.user)  # get orders for logged-in user
+    return render(request, 'orders.html', {'orders': user_orders})
+
+def my_orders(request):
+    user_orders = Order.objects.filter(user=request.user)  # only current user's orders
+    return render(request, 'my_orders.html', {'orders': user_orders})
+
+def qr_payment(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    return render(request, 'qr_payment.html', {'order': order})
 
 def about(request):
     return render(request, 'about.html')
+
+@login_required
+def return_order(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+
+    # sirf delivered order return thai
+    if order.status != 'delivered':
+        return redirect('my_orders')
+
+    if request.method == 'POST':
+        OrderReturn.objects.create(
+            order=order,
+            reason=request.POST.get('reason')
+        )
+
+        order.status = 'returned'
+        order.save()
+
+        Notification.objects.create(
+            user=request.user,
+            message=f"Return requested for Order #{order.id}"
+        )
+
+        return redirect('my_orders')
+
+    return render(request, 'return_order.html', {
+        'order': order
+    })
+
+
+@login_required
+def add_review(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+
+    # Check if user already reviewed this product
+    existing_review = ProductReview.objects.filter(product=product, user=request.user).first()
+
+    if request.method == "POST":
+        form = ProductReviewForm(request.POST, instance=existing_review)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.user = request.user
+            review.product = product
+            review.save()
+            return redirect('product_detail', id=product.id)
+
+    else:
+        form = ProductReviewForm(instance=existing_review)
+
+    return render(request, 'add_review.html', {'form': form, 'product': product})
+
+@login_required
+def delete_review(request, review_id):
+    review = get_object_or_404(ProductReview, id=review_id, user=request.user)
+    product_id = review.product.id
+    review.delete()
+
+    messages.success(request, "Review deleted")
+    return redirect('product_detail', id=product_id)
+
+@login_required
+def notifications(request):
+    data = Notification.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'notifications.html', {'notifications': data})
+
+
+@login_required
+def mark_notification_read(request, id):
+    note = get_object_or_404(Notification, id=id, user=request.user)
+    note.is_read = True
+    note.save()
+    return redirect('notifications')
+
+@login_required
+def refund_request(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+
+    if request.method == "POST":
+        reason = request.POST.get('reason')
+
+        Refund.objects.create(
+            order=order,
+            amount=order.total_amount,
+            reason=reason
+        )
+
+        order.status = 'returned'
+        order.save()
+
+        Notification.objects.create(
+            user=request.user,
+            message=f"Refund requested for Order #{order.id}"
+        )
+
+        messages.success(request, "Refund request submitted")
+        return redirect('my_orders')
+
+@csrf_exempt
+def payment_success(request):
+    payment_id = request.POST.get('razorpay_payment_id')
+    order_id = request.POST.get('order_id')
+
+    payment = Payment.objects.get(order_id=order_id)
+    payment.razorpay_payment_id = payment_id
+    payment.status = 'paid'
+    payment.paid_at = timezone.now()
+    payment.save()
+
+    order = payment.order
+    order.is_paid = True
+    order.payment_status = 'paid'
+    order.status = 'confirmed'
+    order.save()
+
+    Notification.objects.create(
+        user=order.user,
+        message=f"Payment successful for Order #{order.id}"
+    )
+
+    return redirect('order_success', order_id=order.id)
+
+@csrf_exempt
+def payment_failed(request):
+    messages.error(request, "Payment failed")
+    return redirect('checkout')
+
+@login_required
+def update_order_status(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+
+    if request.method == "POST":
+        status = request.POST.get('status')
+        order.status = status
+        order.save()
+
+        Notification.objects.create(
+            user=order.user,
+            message=f"Order #{order.id} status updated to {status}"
+        )
+
+        messages.success(request, "Order status updated")
+        return redirect('order_list')
+    
+@login_required
+def unread_notifications(request):
+    notes = Notification.objects.filter(
+        user=request.user,
+        is_read=False
+    ).values('id', 'message')
+
+    return JsonResponse(list(notes), safe=False)
+

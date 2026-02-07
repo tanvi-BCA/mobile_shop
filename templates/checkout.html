@@ -57,11 +57,16 @@
 <li class="dashboard-dropdown">
     <a href="#" class="dashboard-link" onclick="toggleDashboard(event)">
         {% if user.is_authenticated %}
-            <span class="dashboard-user">
-                <img src="{{ user.userprofile.profile_image.url }}"
-                     class="header-profile-img">
-                Hi, {{ user.username }}
-            </span>
+             <span class="dashboard-user">
+
+        {% if user.userprofile.profile_image %}
+            <img src="{{ user.userprofile.profile_image.url }}"
+                 class="header-profile-img">
+        {% endif %}
+
+        Hi, {{ user.username }}
+
+    </span>
         {% else %}
             My Dashboard
         {% endif %}
@@ -70,7 +75,7 @@
     <ul class="dashboard-menu" style="display: none;">
         {% if user.is_authenticated %}
             <li><a href="{% url 'my_profile' %}">My Profile</a></li>
-            <li><a href="{% url 'my_address' %}">My Address</a></li>
+            <li><a href="{% url 'my_orders' %}">My Orders</a></li>
             <li><a href="{% url 'order_list' %}">Order List</a></li>
             <li><a href="{% url 'order_status' %}">Order Status</a></li>
             <li><a href="{% url 'logout' %}">Logout</a></li>
@@ -106,15 +111,15 @@
 						<div class="col-md-6">
 							<div class="header-search fix-dropdown">
 								
-								<form method="get" action="{% url 'store' %}">
+									<form method="GET" action="{% url 'store' %}">
 									 <select name="category" onchange="this.form.submit()" class="input-select">
         <option value="">All Categories</option>
 
         {% for cat in categories %}
-            <option value="{{ cat.id }}"
-                {% if request.GET.category == cat.id|stringformat:"s" %}
-                    selected
-                {% endif %}>
+            <option value="{{ cat.slug }}"
+                 {% if request.GET.category == cat.slug %}
+                selected
+            {% endif %}>
                 {{ cat.category_name }}
             </option>
 
@@ -191,9 +196,7 @@
             <a href="{% url 'store' %}">Shop</a>
         </li>
 
-        <li class="{% if request.resolver_match.url_name == 'cart' %}active{% endif %}">
-            <a href="{% url 'cart' %}">Cart</a>
-        </li>
+
 
         <li class="{% if request.resolver_match.url_name == 'checkout' %}active{% endif %}">
             <a href="{% url 'checkout' %}">Checkout</a>
@@ -201,6 +204,10 @@
 
         <li class="{% if request.resolver_match.url_name == 'contact' %}active{% endif %}">
             <a href="{% url 'contact' %}">Contact</a>
+        </li>
+
+		 <li class="{% if request.resolver_match.url_name == 'cart' %}active{% endif %}">
+            <a href="{% url 'about' %}">About Us</a>
         </li>
 
     </ul>
@@ -387,7 +394,7 @@
             </div>
         </div>
         <div class="input-radio">
-            <input type="radio" name="payment_method" id="payment-2" value="UPI / GPAY">
+            <input type="radio" name="payment_method" id="payment-2" value="UPI">
             <label for="payment-2">
                 <span></span>
                UPI / GPay / PhonePe
@@ -406,31 +413,8 @@
             I've read and accept the <a href="#">terms & conditions</a>
         </label>
     </div>
-   <button type="button" onclick="openFakeRazorpay()">Place order</button>
-</div>
-<div id="razorpayModal" style="display:none;
- position:fixed; top:0; left:0; width:100%; height:100%;
- background:rgba(0,0,0,0.6); z-index:9999;">
+  <button type="submit">Place order</button>
 
-  <div style="background:#fff; width:350px; margin:100px auto;
-   padding:20px; border-radius:8px; text-align:center;">
-
-    <h3 style="color:#3399cc">Razorpay</h3>
-    <p>Pay ₹{{ total_amount }}</p>
-
-    <img src="{% static 'img/dummy.png' %}" width="200">
-
-    <br><br>
-
-    <button onclick="paymentSuccess()" style="background:green;color:white;padding:10px 20px;border:none">
-      Pay Now
-    </button>
-
-    <button onclick="paymentFail()" style="background:red;color:white;padding:10px 20px;border:none">
-      Fail
-    </button>
-
-  </div>
 </div>
 
 </div>
@@ -602,18 +586,6 @@ function toggleDashboard(event) {
     } else {
         menu.style.display = "block";
     }
-}
-
-function openFakeRazorpay(){
-    document.getElementById("razorpayModal").style.display = "block";
-}
-
-function paymentSuccess(){
-    window.location.href = "{% url 'order_success' order_id=order.id %}";
-}
-
-function paymentFail(){
-    window.location.href = "{% url 'payment_failed' order_id=order.id %}";
 }
 
 

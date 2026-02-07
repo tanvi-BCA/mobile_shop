@@ -166,7 +166,8 @@ td {
         <tr>
             <td>{{ item.product.name }}</td>
             <td>{{ item.quantity }}</td>
-            <td class="text-right">₹ {{ item.price }}</td>
+            <td class="text-right">₹ {{ item.total_price|floatformat:2 }}</td>
+
              <td class="text-right">
         ₹ {{ item.quantity|floatformat:0 }} × {{ item.price }} = 
         ₹ {{ item.quantity|add:0 }}
@@ -179,11 +180,11 @@ td {
     <div class="total-box">
         <div>
             <span>Subtotal</span>
-            <span>₹ {{ grand.total }}</span>
+            <span>₹ {{ order.total_amount|floatformat:2 }}</span>
         </div>
         <div class="grand">
             <span>Grand Total</span>
-            <span>₹ {{ grand.total }}</span>
+            <span>₹ {{ order.total_amount|floatformat:2 }}</span>
         </div>
     </div>
 

@@ -31,12 +31,14 @@ urlpatterns = [
 
     # 🛒 Cart & Checkout
     path('cart/', views.cart, name='cart'),
-    path('category/<int:id>/', views.category_products, name='category_products'),
+   path('category/<slug:slug>/', views.category_products, name='category_products'),
+
     path('checkout/', views.checkout, name='checkout'),
     path('add-to-cart/<int:id>/', views.add_to_cart, name='add_to_cart'),
     path('remove-from-cart/<int:product_id>/', views.remove_from_cart, name='remove_from_cart'),
     path('increase-quantity/<int:product_id>/', views.increase_quantity, name='increase_quantity'),
     path('decrease-quantity/<int:product_id>/', views.decrease_quantity, name='decrease_quantity'),
+    path('edit-profile/', views.edit_profile, name='edit_profile'),
 
     # ❤️ Wishlist
     path('wishlist/', views.wishlist, name='wishlist'),
@@ -47,12 +49,32 @@ urlpatterns = [
     # 📦 Orders
     path('order-list/', views.order_list, name='order_list'),
     path('order-status/', views.order_status, name='order_status'),
-    path('place-order/', views.place_order, name='place_order'),
-      path('payment-failed/', views.payment_failed, name='payment_failed'),
-    path('order-success/<int:order_id>/', views.order_success, name='order_success'),
-   path('my_orders/', views.my_orders, name='my_orders'),
-
     path('return-order/<int:order_id>/', views.return_order, name='return_order'),
+    path('my-orders/', views.my_orders, name='my_orders'),
+      path('orders/', views.orders, name='orders'),
+      path('qr/<int:order_id>/', views.qr_payment, name='qr_payment'),
+    path('qr/<int:order_id>/pay/', views.payment_success_dummy, name='payment_success_dummy'),
+     path('product/<int:product_id>/review/', views.add_review, name='add_review'),
+      path('product/<int:id>/', views.product_detail, name='product_detail'),
+    path('product/<int:product_id>/review/', views.add_review, name='add_review'),
+    path('review/<int:review_id>/delete/', views.delete_review, name='delete_review'),
+    
+    path('place-order/', views.place_order, name='place_order'),
+
+    path("order-success/<int:order_id>/", views.order_success,name="order_success"),
+    path('my_orders/', views.my_orders, name='my_orders'),
+    path('return-order/<int:order_id>/', views.return_order, name='return_order'),
+
+     path('product/<int:id>/', views.product_detail, name='product_detail'),
+
+    path('refund/<int:order_id>/', views.refund_request, name='refund_request'),
+    path('product/<int:id>/', views.product_detail, name='product_detail'),
+    # 🔔 Notifications
+    path('notifications/', views.notifications, name='notifications'),
+    path('notification/read/<int:id>/', views.mark_notification_read, name='mark_notification_read'),
+    path('notifications/unread/', views.unread_notifications, name='unread_notifications'),
+
+
 
     # 🧾 Invoice
     path('invoice-a4/<int:order_id>/', views.invoice_a4, name='invoice_a4'),

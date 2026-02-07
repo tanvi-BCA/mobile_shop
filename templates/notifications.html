@@ -1,0 +1,18 @@
+<h2>Notifications</h2>
+
+{% if notifications %}
+    {% for note in notifications %}
+        <div style="border-bottom:1px solid #ddd; padding:10px">
+            <b>{{ note.message }}</b><br>
+            <small>{{ note.created_at }}</small>
+
+            {% if not note.is_read %}
+                <a href="{% url 'mark_notification_read' note.id %}">
+                    Mark as read
+                </a>
+            {% endif %}
+        </div>
+    {% endfor %}
+{% else %}
+    <p>No notifications</p>
+{% endif %}

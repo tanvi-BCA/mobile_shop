@@ -8,6 +8,17 @@ from .models import HotDeal
 from .models import NewsletterSubscriber  
 from django.core.mail import send_mail
 from django.conf import settings
+from .models import (
+    Role,
+    Payment,
+    OrderReturn,
+    OrderStatusHistory,
+    Refund,
+    Address,
+    Notification,
+    ProductReview
+)
+
 
 User = get_user_model()
 
@@ -86,3 +97,11 @@ admin.site.register(Wishlist, WishlistAdmin)
 admin.site.register(Order, OrderAdmin)
 admin.site.register(OrderItem, OrderItemAdmin)
 admin.site.register(UserProfile)
+admin.site.register(Role)
+admin.site.register(Payment)
+admin.site.register(OrderReturn)
+admin.site.register(OrderStatusHistory)
+admin.site.register(Refund)
+admin.site.register(Address)
+admin.site.register(Notification)
+admin.site.register(ProductReview)

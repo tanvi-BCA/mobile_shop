@@ -3,6 +3,7 @@ from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.shortcuts import render
+from django.utils.text import slugify
 
 
 # ------------------
@@ -23,16 +24,23 @@ class Role(models.Model):
 # ------------------
 class ProductCategory(models.Model):
     category_name = models.CharField(max_length=100)
+    slug = models.SlugField(unique=True, blank=True)
+    description = models.TextField(blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.category_name)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.category_name
-
 
 # ------------------
 # PRODUCT BRAND
 # ------------------
 class ProductBrand(models.Model):
     brand_name = models.CharField(max_length=100)
+    slug = models.SlugField(unique=True, blank=True)
 
     def __str__(self):
         return self.brand_name
@@ -96,6 +104,7 @@ class NewsletterSubscriber(models.Model):
         return self.email
     
 
+
 # ------------------
 # CART
 # ------------------
@@ -139,7 +148,7 @@ class Order(models.Model):
     ]
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-
+    is_paid = models.BooleanField(default=False)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField()
@@ -173,7 +182,6 @@ class Order(models.Model):
 
     def __str__(self):
         return f"Order #{self.id} - {self.user}"
-
 
 
 class OrderItem(models.Model):
@@ -225,15 +233,95 @@ class HotDeal(models.Model):
     def __str__(self):
         return self.title
     
+class Payment(models.Model):
+    order = models.OneToOneField(Order, on_delete=models.CASCADE)
+    razorpay_order_id = models.CharField(max_length=100, blank=True, null=True)
+    razorpay_payment_id = models.CharField(max_length=100, blank=True, null=True)
+    razorpay_signature = models.CharField(max_length=255, blank=True, null=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ('created', 'Created'),
+            ('paid', 'Paid'),
+            ('failed', 'Failed'),
+            ('refunded', 'Refunded'),
+        ],
+        default='created'
+    )
+    paid_at = models.DateTimeField(blank=True, null=True)
 
+    def __str__(self):
+        return f"Payment for Order #{self.order.id}"
 
-def payment(request):
-    client = razorpay.Client(auth=("rzp_test_xxxxx", "secret_xxxxx"))
+class ProductReview(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    rating = models.PositiveIntegerField(default=5)
+    comment = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
-    order = client.order.create({
-        "amount": 10000,  # ₹100
-        "currency": "INR",
-        "payment_capture": "1"
-    })
+    class Meta:
+        unique_together = ('product', 'user')
 
-    return render(request, "payment.html", {"order": order})
+    def __str__(self):
+        return f"{self.product.product_name} - {self.rating}⭐"
+
+class Notification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    message = models.CharField(max_length=255)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.message
+
+class Address(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='addresses')
+    full_name = models.CharField(max_length=100)
+    phone = models.CharField(max_length=15)
+    address = models.TextField()
+    city = models.CharField(max_length=50)
+    state = models.CharField(max_length=50)
+    country = models.CharField(max_length=50)
+    pincode = models.CharField(max_length=10)
+    is_default = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.city}"
+
+class Refund(models.Model):
+    order = models.OneToOneField(Order, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    reason = models.TextField()
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ('initiated', 'Initiated'),
+            ('completed', 'Completed'),
+        ],
+        default='initiated'
+    )
+    refunded_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Refund Order #{self.order.id}"
+
+class Shipment(models.Model):
+    order = models.OneToOneField(Order, on_delete=models.CASCADE)
+    courier_name = models.CharField(max_length=100)
+    tracking_number = models.CharField(max_length=100, blank=True, null=True)
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ('pending', 'Pending'),
+            ('shipped', 'Shipped'),
+            ('delivered', 'Delivered'),
+        ],
+        default='pending'
+    )
+    shipped_at = models.DateTimeField(null=True, blank=True)
+    delivered_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Shipment Order #{self.order.id}"

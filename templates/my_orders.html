@@ -9,7 +9,7 @@
         body {
             margin: 0;
             font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #fff5f5, #ffecec);
+            background: linear-gradient(135deg, #fff5f5, #edecff);
         }
 
         .container {
@@ -18,14 +18,21 @@
             padding: 20px;
         }
 
-        h1 {
-            text-align: center;
-            font-size: 36px;
-            margin-bottom: 40px;
-            background: linear-gradient(to right, #ff4b2b, #ff416c);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+       h1 {
+    text-align: center;
+    font-size: 36px;
+    margin-bottom: 40px;
+    color: #ff0000; /* solid red */
+    background: none; /* remove gradient */
+    -webkit-background-clip: unset;
+    -webkit-text-fill-color: unset;
+}
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: #ffffff; /* plain white background */
+}
+
 
         .order-card {
             background: #fff;
@@ -49,6 +56,42 @@
             margin-bottom: 15px;
         }
 
+       h1 {
+    text-align: center;
+    font-size: 36px;
+    margin-bottom: 40px;
+    background: linear-gradient(to right, #ff0000, #cc0000); /* red gradient */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+h1 {
+    text-align: center;
+    font-size: 36px;
+    margin-bottom: 40px;
+    color: #ff0000; /* solid red */
+}
+.btn-view {
+    background: #ff0000; /* solid red */
+    color: #fff;
+}
+
+.btn-return {
+    background: #fff;
+    border: 2px solid #ff0000;
+    color: #ff0000;
+}
+
+.btn-return:hover {
+    background: #ff0000;
+    color: #fff;
+}
+.cancelled, .returned {
+    background: #ff0000;
+    color: #fff;
+}
+
+
+
         .order-id {
             font-weight: 600;
             font-size: 18px;
@@ -67,12 +110,12 @@
             color: #fff;
         }
 
-        .Pending { background: orange; }
-        .Confirmed { background: #3498db; }
-        .Shipped { background: #6c5ce7; }
-        .Delivered { background: #2ecc71; }
-        .Returned { background: #e74c3c; }
-        .Cancelled { background: #7f8c8d; }
+       .pending { background: orange; }
+.confirmed { background: #3498db; }
+.shipped { background: #6c5ce7; }
+.delivered { background: #2ecc71; }
+.returned { background: #e74c3c; }
+.cancelled { background: #7f8c8d; }
 
         .order-body p {
             margin: 8px 0;
@@ -156,9 +199,10 @@
                         <div class="order-date">{{ order.created_at|date:"d M Y, h:i A" }}</div>
                     </div>
 
-                    <span class="status {{ order.status }}">
-                        {{ order.status }}
-                    </span>
+                   <span class="status {{ order.status }}">
+    {{ order.status|title }}
+</span>
+
                 </div>
 
                 <div class="order-body">
@@ -184,11 +228,12 @@
                         View Invoice
                     </a>
 
-                    {% if order.status == "Delivered" %}
-                        <a href="{% url 'return_order' order.id %}" class="btn btn-return">
-                            Return Order
-                        </a>
-                    {% endif %}
+                  {% if order.status == "delivered" %}
+    <a href="{% url 'return_order' order.id %}" class="btn btn-return">
+        Return Order
+    </a>
+{% endif %}
+
                 </div>
             </div>
         {% endfor %}
