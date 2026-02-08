@@ -255,15 +255,21 @@
             </td>
 
             <!-- QUANTITY -->
-            <td class="text-center" style="color:black;">
-                <a href="{% url 'decrease_quantity' item.product.id %}"
-                   class="btn btn-sm btn-outline-secondary">−</a>
+          <td class="text-center">
+    <!-- Decrease button: disable if quantity is 1 -->
+    <a href="{% url 'decrease_quantity' item.product.id %}" 
+       class="btn btn-sm btn-outline-secondary {% if item.quantity <= 1 %}disabled{% endif %}">−</a>
 
-                <span class="mx-2">{{ item.quantity }}</span>
+    <span class="mx-2">{{ item.quantity }}</span>
 
-                <a href="{% url 'increase_quantity' item.product.id %}"
-                   class="btn btn-sm btn-outline-secondary">+</a>
-            </td>
+    <!-- Increase button: disable if quantity reached stock or max limit -->
+    <a href="{% url 'increase_quantity' item.product.id %}" 
+       class="btn btn-sm btn-outline-secondary
+       {% if item.quantity >= item.product.stock or item.quantity >= MAX_CART_QTY_PER_ITEM %}disabled{% endif %}">
+        +
+    </a>
+</td>
+
 
             <!-- ✅ TOTAL PRICE -->
             <td style="color:black;">

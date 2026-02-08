@@ -87,7 +87,7 @@ DATABASES = {
         'NAME': 'mydb1',
         'USER': 'root',
         'PASSWORD': '',
-        'HOST': 'localhost',   # 👈 change this
+        'HOST': 'localhost',  
         'PORT': '3306',
     }
 }
@@ -204,5 +204,5 @@ LOGIN_URL = "/login/"
 LOGOUT_REDIRECT_URL = "/login/"
 
 # 🛒 Cart Limits
-MAX_CART_QTY_PER_ITEM = 6
-MAX_CART_TOTAL_AMOUNT = 40000
+MAX_CART_QTY_PER_ITEM = 10
+MAX_CART_TOTAL_AMOUNT = 50000

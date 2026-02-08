@@ -232,6 +232,7 @@ h1 {
     <a href="{% url 'return_order' order.id %}" class="btn btn-return">
         Return Order
     </a>
+    
 {% endif %}
 
                 </div>
@@ -241,6 +242,28 @@ h1 {
         <p class="empty">You have not placed any orders yet.</p>
     {% endif %}
 </div>
+<div class="order-actions">
+
+
+    {% if order.payment_status == "paid" and order.status != "delivered" %}
+        {% if order.refund %}
+            <span class="btn btn-return" style="cursor: default;">
+                Refund {{ order.refund.status|title }}
+            </span>
+        {% else %}
+            <a href="{% url 'refund_request' order.id %}" class="btn btn-return">
+                Request Refund
+            </a>
+        {% endif %}
+    {% endif %}
+
+    {% if order.status == "delivered" %}
+        <a href="{% url 'return_order' order.id %}" class="btn btn-return">
+            Return Order
+        </a>
+    {% endif %}
+</div>
+
 
 </body>
 </html>

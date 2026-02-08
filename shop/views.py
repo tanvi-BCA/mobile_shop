@@ -18,8 +18,10 @@ from .models import NewsletterSubscriber
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from .forms import AddressForm
+from .models import CartItem
 from .models import Address
 from .models import Order
+from .models import Order, OrderReturn
 
 
 
@@ -231,24 +233,6 @@ def store(request):
     return render(request, 'store.html', context)
 
 
-
-
-def newsletter_subscribe(request):
-    if request.method == "POST":
-        email = request.POST.get("email")
-
-        if not email:
-            messages.error(request, "Email is required")
-            return redirect(request.META.get('HTTP_REFERER'))
-
-        obj, created = NewsletterSubscriber.objects.get_or_create(email=email)
-
-        if created:
-            messages.success(request, "Subscribed successfully 🎉")
-        else:
-            messages.warning(request, "Email already subscribed")
-
-        return redirect(request.META.get('HTTP_REFERER'))
 
 
 def home(request):
@@ -500,30 +484,50 @@ def cart(request):
     return render(request, 'cart.html', context)
 
 @login_required
-def add_to_cart(request, id):
-    product = get_object_or_404(Product, id=id)
+def add_to_cart(request, product_id):
+    product = Product.objects.get(id=product_id)
+    
+    # 1️⃣ Check if product is out of stock
+    if product.stock <= 0:
+        messages.error(request, "Out of stock! Cannot add this product.")
+        return redirect('store')  # or wherever your store page is
 
-    qty = int(request.POST.get('quantity', 1))  # ⬅️ qty read
-
+    # 2️⃣ Get or create cart item
     cart_item, created = Cart.objects.get_or_create(
-        user=request.user,
+        user=request.user, 
         product=product
     )
 
-    if created:
-        cart_item.quantity = qty
+    # 3️⃣ Check stock before increasing quantity
+    if cart_item.quantity >= product.stock:
+        messages.error(request, "Cannot add more, stock limit reached!")
+    elif cart_item.quantity >= settings.MAX_CART_QTY_PER_ITEM:
+        messages.error(request, f"Maximum {settings.MAX_CART_QTY_PER_ITEM} quantity allowed per product")
     else:
-        cart_item.quantity += qty
+        cart_item.quantity += 1
+        cart_item.save()
+        messages.success(request, "Product added to cart.")
 
-    cart_item.save()
+    return redirect('store')
 
-    Notification.objects.create(
-        user=request.user,
-        message=f"{product.product_name} added to cart"
-    )
+def update_order_status(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
 
-    return redirect('cart')   # ⬅️ store nai, cart
+    if request.method == 'POST':
+        new_status = request.POST.get('status')
+        if new_status in dict(Order.STATUS_CHOICES).keys():
+            order.status = new_status
+            order.save()
+            messages.success(request, f"Order #{order.id} status updated to {new_status}.")
+        else:
+            messages.error(request, "Invalid status.")
+        return redirect('order_list')  # redirect to order list page
 
+    context = {
+        'order': order,
+        'status_choices': Order.STATUS_CHOICES
+    }
+    return render(request, 'admin/update_order_status.html', context)
 
 
 @login_required
@@ -551,15 +555,19 @@ def remove_from_cart(request, product_id):
 
 @login_required
 def increase_quantity(request, product_id):
-    cart_item = Cart.objects.filter(
-        user=request.user,
-        product_id=product_id
-    ).first()
+    cart_item = Cart.objects.filter(user=request.user, product_id=product_id).first()
 
     if not cart_item:
         return redirect('cart')
 
-    # ❌ quantity limit
+    product = cart_item.product
+
+    # 1️⃣ Check actual stock
+    if cart_item.quantity >= product.stock:
+        messages.error(request, "Out of stock! Cannot add more.")
+        return redirect('cart')
+
+    # 2️⃣ Check max quantity per item
     if cart_item.quantity >= settings.MAX_CART_QTY_PER_ITEM:
         messages.error(
             request,
@@ -567,25 +575,24 @@ def increase_quantity(request, product_id):
         )
         return redirect('cart')
 
-    # ❌ total amount limit
+    # 3️⃣ Check cart total limit
     current_total = sum(
         item.product.price * item.quantity
         for item in Cart.objects.filter(user=request.user)
     )
-
-    if current_total + cart_item.product.price > settings.MAX_CART_TOTAL_AMOUNT:
+    if current_total + product.price > settings.MAX_CART_TOTAL_AMOUNT:
         messages.error(
             request,
             "Cart total limit exceeded. Please checkout first."
         )
         return redirect('cart')
 
-    # ✅ allowed
+    # ✅ Allowed to increase
     cart_item.quantity += 1
     cart_item.save()
 
+    messages.success(request, "Quantity updated.")
     return redirect('cart')
-
 
 
 # ---------- WISHLIST ----------
@@ -701,43 +708,44 @@ def orders(request):
     user_orders = Order.objects.filter(user=request.user)  # get orders for logged-in user
     return render(request, 'orders.html', {'orders': user_orders})
 
+@login_required
 def my_orders(request):
-    user_orders = Order.objects.filter(user=request.user)  # only current user's orders
-    return render(request, 'my_orders.html', {'orders': user_orders})
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'my_orders.html', {'orders': orders})
 
 def qr_payment(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
     return render(request, 'qr_payment.html', {'order': order})
 
-
 @login_required
 def return_order(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
 
-    # sirf delivered order return thai
+    # Only allow returns for delivered orders
     if order.status != 'delivered':
         return redirect('my_orders')
 
+    # Check if a return request already exists
+    order_return = getattr(order, 'orderreturn', None)
+
     if request.method == 'POST':
-        OrderReturn.objects.create(
-            order=order,
-            reason=request.POST.get('reason')
-        )
+        reason = request.POST.get('reason')
+        if reason:
+            if order_return:
+                messages.warning(request, "You have already submitted a return request for this order.")
+            else:
+                OrderReturn.objects.create(order=order, reason=reason)
+                order.status = 'returned'
+                order.save()
+                Notification.objects.create(
+                    user=request.user,
+                    message=f"Return requested for Order #{order.id}"
+                )
+                return render(request, 'return_submitted.html', {'order': order})
+        else:
+            messages.error(request, "Please provide a reason for return.")
 
-        order.status = 'returned'
-        order.save()
-
-        Notification.objects.create(
-            user=request.user,
-            message=f"Return requested for Order #{order.id}"
-        )
-
-        return redirect('my_orders')
-
-    return render(request, 'return_order.html', {
-        'order': order
-    })
-
+    return render(request, 'return_order.html', {'order': order, 'order_return': order_return})
 
 @login_required
 def add_review(request, product_id):
@@ -883,8 +891,6 @@ def about(request):
 def privacy_policy(request):
     return render(request, 'privacy_policy.html')
 
-def return_order(request):
-    return render(request, 'return_order.html')
 
 def terms_conditions(request):
     return render(request, 'terms_conditions.html')

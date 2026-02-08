@@ -25,7 +25,7 @@ urlpatterns = [
     path('invoice-pdf/<int:order_id>/', views.download_invoice_pdf, name='download_invoice_pdf'),
 
     path('my-address/', views.my_address, name='my_address'),
-    path('newsletter/subscribe/', views.newsletter_subscribe, name='newsletter_subscribe'),
+  
     path('about/', views.about, name='about'),
     
 
@@ -34,7 +34,7 @@ urlpatterns = [
    path('category/<slug:slug>/', views.category_products, name='category_products'),
 
     path('checkout/', views.checkout, name='checkout'),
-    path('add-to-cart/<int:id>/', views.add_to_cart, name='add_to_cart'),
+ path('add-to-cart/<int:product_id>/', views.add_to_cart, name='add_to_cart'),
     path('remove-from-cart/<int:product_id>/', views.remove_from_cart, name='remove_from_cart'),
     path('increase-quantity/<int:product_id>/', views.increase_quantity, name='increase_quantity'),
     path('decrease-quantity/<int:product_id>/', views.decrease_quantity, name='decrease_quantity'),
@@ -60,7 +60,8 @@ urlpatterns = [
     path('review/<int:review_id>/delete/', views.delete_review, name='delete_review'),
 
     path('hot-deal/', views.hot_deal_products, name='hot_deal_products'),
-
+     path('cart/increase/<int:product_id>/', views.increase_quantity, name='increase_quantity'),
+    path('cart/decrease/<int:product_id>/', views.decrease_quantity, name='decrease_quantity'),
     path('place-order/', views.place_order, name='place_order'),
 
     path("order-success/<int:order_id>/", views.order_success,name="order_success"),
@@ -89,6 +90,7 @@ urlpatterns = [
     path('my-account/', views.my_account, name='my_account'),
     path('add-address/', views.add_address, name='add_address'),
 
+    path('return-order/<int:order_id>/', views.return_order, name='return_order'),
 
 
     path('forgot-password/', auth_views.PasswordResetView.as_view(

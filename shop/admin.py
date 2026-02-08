@@ -77,15 +77,8 @@ class OrderItemAdmin(admin.ModelAdmin):
 class HotDealAdmin(admin.ModelAdmin):
     filter_horizontal = ('products',)
 
-@admin.register(NewsletterSubscriber)
-class NewsletterSubscriberAdmin(admin.ModelAdmin):
-    actions = ['test_action']
 
-    def test_action(self, request, queryset):
-        self.message_user(request, "TEST ACTION WORKING")
 
-    test_action.short_description = "TEST ACTION"
-    
 # ----------------------
 # Register all other models (once each!)
 # ----------------------

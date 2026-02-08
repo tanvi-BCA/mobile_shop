@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Return Request Submitted</title>
+    <style>
+        body { font-family: Arial; text-align: center; background: #fff5f5; padding: 50px; }
+        h1 { color: #ff0000; }
+        p { font-size: 18px; }
+        a { display: inline-block; margin-top: 20px; padding: 10px 20px; background: #ff0000; color: #fff; text-decoration: none; border-radius: 6px; }
+        a:hover { background: #cc0000; }
+    </style>
+</head>
+<body>
+    <h1>Return Request Submitted!</h1>
+    <p>Order #{{ order.id }} has been marked for return.</p>
+    <p>We will contact you soon.</p>
+    <a href="{% url 'my_orders' %}">Back to My Orders</a>
+</body>
+</html>

@@ -1,11 +1,36 @@
-<h2>Return Order #{{ order.id }}</h2>
+{% block content %}
 
-<form method="post">
-    {% csrf_token %}
-    <label>Reason for return</label><br>
-    <textarea name="reason" required></textarea><br><br>
+<div style="min-height: 80vh; display: flex; justify-content: center; align-items: center; background-color: #fff0f0; padding: 2rem;">
+    <div style="max-width: 600px; width: 100%; background: #ffffff; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); padding: 2rem; text-align: center; border-top: 5px solid #dc3545;">
+        
+        <h1 style="color: #dc3545; margin-bottom: 1rem;">Return Order #{{ order.id }}</h1>
 
-    <button type="submit" class="btn btn-danger">
-        Submit Return Request
-    </button>
-</form>
+        {% if already_returned %}
+            <div style="background-color: #dcf0f2; color: #155724; padding: 1rem; border-radius: 8px; border: 1px solid #c3e6cb; margin-top: 1rem;">
+                <h5 style="margin-bottom: 0.5rem;">Return Request Submitted</h5>
+                <p style="margin: 0;"><strong>Reason:</strong> {{ order_return.reason }}</p>
+            </div>
+        {% else %}
+            <p style="color: #6c757d; margin-bottom: 1.5rem;">
+                Please provide a reason for returning your order. We’ll review it quickly.
+            </p>
+
+            <form method="post">
+                {% csrf_token %}
+                <textarea name="reason" required placeholder="Enter your reason for return..."
+                          style="width: 100%; padding: 0.8rem; border-radius: 10px; border: 1px solid #ced4da; font-size: 1rem; resize: none; margin-bottom: 1rem;"></textarea>
+                
+                <button type="submit" 
+                        style="background-color: #dc3545; color: white; padding: 0.75rem 1rem; font-size: 1.1rem; border: none; border-radius: 10px; width: 100%; cursor: pointer; transition: 0.3s;">
+                    Submit Return Request
+                </button>
+            </form>
+        {% endif %}
+
+        <p style="color: #6c757d; font-size: 0.85rem; margin-top: 1.5rem;">
+            Returns are processed within 5-7 business days.
+        </p>
+    </div>
+</div>
+
+{% endblock %}

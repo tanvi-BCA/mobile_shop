@@ -1,12 +1,39 @@
-
 {% block content %}
 
-<h3>Request Refund</h3>
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <!-- Card container -->
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h3 class="card-title mb-4 text-center text-danger">Request a Refund</h3>
+                    <p class="text-center text-muted mb-4">
+                        Please provide a reason for your refund request. We’ll review it promptly.
+                    </p>
+                    
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <textarea name="reason" class="form-control form-control-lg" 
+                                placeholder="Enter your reason..." rows="5" required></textarea>
+                        </div>
 
-<form method="POST">
-    {% csrf_token %}
-    <textarea name="reason" class="form-control" placeholder="Refund reason"></textarea>
-    <button class="btn btn-danger mt-2">Submit Refund</button>
-</form>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-danger btn-lg">
+                                Submit Refund
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Optional: Small note -->
+            <p class="text-center text-muted mt-3 small">
+                Refunds are processed within 5-7 business days.
+            </p>
+        </div>
+    </div>
+</div>
 
 {% endblock %}
